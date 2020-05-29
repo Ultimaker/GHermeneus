@@ -1,4 +1,5 @@
-project(GHermeneus VERSION 0.1.0 LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.17)
+project(GHermeneus)
 
 set(SRC_FILES
         src/Machine.cpp
@@ -9,8 +10,4 @@ set(HDR_FILES
         include/GHermeneus/State.h)
 
 add_library(GHermeneus SHARED ${SRC_FILES} ${HDR_FILES})
-
-target_include_directories(GHermeneus PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:include>
-        PRIVATE src)
+conan_target_link_libraries(GHermeneus)
