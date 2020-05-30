@@ -5,7 +5,7 @@ import platform
 class GHermeneusConan(ConanFile):
     name = "GHermeneus"
     version = "0.1"
-    license = "<Put the package license here>"
+    license = "LGPL-3.0"
     author = "Jelle Spijker <j.spijker@ultimaker.com>"
     url = "https://github.com/Ultimaker/GHermeneus"
     description = "Fast GCode interpreter"
