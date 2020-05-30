@@ -14,7 +14,7 @@ and freeing the GIL (Global Interpreter Lock).
 A machine can have multiple tools, each tool is represented by a state vector. This vector const of the position, velocity
 extrusion speed, temperature etc.
 
- $ \vec{x}_k = [x, y, z, \dot{x}, \dot{y}, \dot{z}, e, \dot{e}, T_t, T_b, t] $
+<a href="https://www.codecogs.com/eqnedit.php?latex=\vec{x}_k&space;=&space;[x,&space;y,&space;z,&space;\dot{x},&space;\dot{y},&space;\dot{z},&space;e,&space;\dot{e},&space;T_t,&space;T_b,&space;t]" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\vec{x}_k&space;=&space;[x,&space;y,&space;z,&space;\dot{x},&space;\dot{y},&space;\dot{z},&space;e,&space;\dot{e},&space;T_t,&space;T_b,&space;t]" title="\vec{x}_k = [x, y, z, \dot{x}, \dot{y}, \dot{z}, e, \dot{e}, T_t, T_b, t]" /></a>
 
  - x = coordinates on x-axis
  - y = coordinates on x-axis
@@ -28,8 +28,8 @@ extrusion speed, temperature etc.
  - T_b = Temperature of the bed (maybe this should be placed in an other type)
  - t = time at given GCode command
 
-Each GCode command represents a control input $ \vec{u}_k $ on the tools system, coupled with a State transition matrix
-$ \mathbf{F} $, allows us to transform state vector to time $ k + 1 $
+Each GCode command represents a control input <a href="https://www.codecogs.com/eqnedit.php?latex=\vec{u}_k" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\vec{u}_k" title="\vec{u}_k" /></a> on the tools system, coupled with a State transition matrix
+<a href="https://www.codecogs.com/eqnedit.php?latex=\mathbf{F}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\mathbf{F}" title="\mathbf{F}" /></a>, allows us to transform state vector to time <a href="https://www.codecogs.com/eqnedit.php?latex=k&space;&plus;&space;1" target="_blank"><img src="https://latex.codecogs.com/gif.latex?k&space;&plus;&space;1" title="k + 1" /></a>
 
 ## GCode processing
 
