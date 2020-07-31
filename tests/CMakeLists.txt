@@ -2,7 +2,6 @@ include_directories(../GHermeneus/include)
 
 set(SRC_FILES
         machine_test.cpp
-        state_test.cpp
         main.cpp)
 
 add_executable(GHermeneus_tests "")

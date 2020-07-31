@@ -9,36 +9,20 @@
 #include <vector>
 #include <iostream>
 #include <mutex>
+#include <string_view>
 
 namespace GHermeneus
 {
-    enum Cmd : size_t
-    {
-        G0 = 119,
-        G1 = 120,
-        M140 = 208
-    };
-
-    enum Param : char
-    {
-        E = 'E',
-        F = 'F',
-        S = 'S',
-        X = 'X',
-        Y = 'Y',
-        Z = 'Z',
-    };
-
     struct Parameter
     {
-        Parameter(const Param& param, const double& value)
+        Parameter(const std::string_view& param, const double& value)
                 : param(param), value(value)
         {};
-        const Param param;
+        const std::string_view param;
         const double value;
     };
 
-    using CmdLine = std::tuple<size_t, Cmd, std::vector<Parameter>>;
+    using CmdLine = std::tuple<size_t, std::string_view, std::vector<Parameter>>;
 
     class Machine
     {
@@ -57,9 +41,7 @@ namespace GHermeneus
 
         void extractLines(const std::string_view& gcode);
 
-        [[nodiscard]] CmdLine extractCmd(const GCodeLine& gcodeline);
-
-        [[nodiscard]] size_t cmdHash(const std::string_view& cmd);
+        [[nodiscard]] static CmdLine extractCmd(const GCodeLine& gcodeline);
 
         std::string_view gcode;
         std::vector<GCodeLine> lines;

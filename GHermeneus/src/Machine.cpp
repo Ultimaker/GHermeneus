@@ -3,12 +3,12 @@
 //
 
 #include "../include/GHermeneus/Machine.h"
+#include "../include/GHermeneus/GCode.h"
 
 #include <algorithm>
 #include <execution>
 
 #include <range/v3/distance.hpp>
-#include <range/v3/numeric/accumulate.hpp>
 #include <range/v3/view/split.hpp>
 #include <range/v3/view/transform.hpp>
 #include <range/v3/view/enumerate.hpp>
@@ -53,47 +53,48 @@ namespace GHermeneus
     {
         // TODO: keep in mind CRLF and LF
         lines = gcode
-                | ranges::view::split('\n')
-                | ranges::view::transform([](auto&& line) {
+                | ranges::views::split('\n')
+                | ranges::views::transform([](auto&& line) {
             return std::string_view(&*line.begin(), ranges::distance(line));
         })
-        | ranges::view::enumerate
-        | ranges::to_vector;
+                | ranges::views::enumerate
+                | ranges::to_vector;
     }
 
     CmdLine Machine::extractCmd(const GCodeLine& gcodeline)
     {
-        // TODO: split comment
-        auto &&[lineno, gcode] = gcodeline;
-        // Split the line into individual words
-        auto split_words = gcode
-                | ranges::views::split(' ');
+        std::cout << gcodeline.first << ": " << gcodeline.second << std::endl; // Todo: Use a propper logger
 
-        // Get the Cmd enum
-        auto cmd = split_words
-                | ranges::views::take(1)
-                | ranges::views::transform([&](auto&& c) {
-            return static_cast<Cmd>(cmdHash(std::string_view(&*c.begin(), ranges::distance(c))));
+        auto &&[lineno, gcode] = gcodeline;
+
+        // Split line in instruction and comment
+        auto split_line = gcode
+                          | ranges::views::split(';');
+
+        // Split the instruction into individual words
+        auto split_instruction = *split_line.begin()
+                                 | ranges::views::split(' ');
+
+        // Get the Cmd
+        auto cmd = split_instruction
+                   | ranges::views::take(1)
+                   | ranges::views::transform([&](auto&& c) {
+            return std::string_view(&*c.begin(), ranges::distance(c));
         });
 
         // Get the values and parameters
         // TODO: use std::from_char instead of copying to string
-        auto params = split_words
-                | ranges::views::drop(1)
-                | ranges::views::transform([](auto&& param) {
-                    auto identifier = param
-                            | ranges::views::take(1);
-                    auto val = param
-                            | ranges::views::drop(1);
-                    auto value = std::string(&*val.begin(), ranges::distance(val));
-                    return Parameter(static_cast<Param>(*identifier.begin()), std::stod(value));
-                })
-                | ranges::to_vector;
+        auto params = split_instruction
+                      | ranges::views::drop(1)
+                      | ranges::views::transform([](auto&& param) {
+            auto identifier = param
+                              | ranges::views::take(1);
+            auto val = param
+                       | ranges::views::drop(1);
+            auto value = std::string(&*val.begin(), ranges::distance(val));
+            return Parameter(std::string_view(&*identifier.begin(), ranges::distance(identifier)), std::stod(value));
+        })
+                      | ranges::to_vector;
         return std::make_tuple(lineno, *cmd.begin(), params);
-    }
-
-    size_t Machine::cmdHash(const std::string_view& cmd)
-    {
-        return static_cast<size_t>(ranges::accumulate(cmd, 0));
     }
 }

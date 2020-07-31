@@ -5,6 +5,7 @@
 
 #include <string_view>
 #include <iostream>
+#include <functional>
 
 #include "GHermeneus/Machine.h"
 
@@ -14,9 +15,13 @@ TEST(MachineTestSuite, ParseGCode)
 {
     const auto GCode
     {
+        ";START_OF_HEADER\n"
+        ";FLAVOR:Griffin\n"
+        ";END_OF_HEADER\n"
         "T0\n" // Tool 0
         "M82 ;absolute extrusion mode\n" // set extrusion mode to absolute
         "G92 E0\n" // set the extrusion axis to position 0
+        ";LAYER:0"
         "G0 F15000 X100 Y75.75 Z2\n" // Move to 100, 75.75, 2 with a feedrate of 15000
         "G1 F1500 E-6.5\n" // retract filament 6.5 mm with a feedrate of 1500
         "G1 F600 Z0.27\n" // move tool to a height of 2.27 with a feedrate of 600
