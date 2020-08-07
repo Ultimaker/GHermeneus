@@ -17,7 +17,8 @@
 
 namespace GHermeneus
 {
-    std::ostream& operator<<(std::ostream& os, const Machine& machine)
+    template<typename T>
+    std::ostream& operator<<(std::ostream& os, const Machine<T>& machine)
     {
         for (const auto& cmdline : machine.cmdlines)
         {
@@ -32,13 +33,15 @@ namespace GHermeneus
         return os;
     }
 
-    Machine& operator<<(Machine& machine, const std::string_view& gcode)
+    template<typename T>
+    Machine<T>& operator<<(Machine<T>& machine, const std::string_view& gcode)
     {
         machine.parse(gcode);
         return machine;
     }
 
-    void Machine::parse(const std::string_view& gcode)
+    template<typename T>
+    void Machine<T>::parse(const std::string_view& gcode)
     {
         extractLines(gcode);
         cmdlines.reserve(lines.size());
@@ -49,7 +52,8 @@ namespace GHermeneus
         // TODO: Sort according to line number, or maybe use std::execution::par
     }
 
-    void Machine::extractLines(const std::string_view& gcode)
+    template<typename T>
+    void Machine<T>::extractLines(const std::string_view& gcode)
     {
         // TODO: keep in mind CRLF and LF
         lines = gcode
@@ -61,7 +65,8 @@ namespace GHermeneus
                 | ranges::to_vector;
     }
 
-    CmdLine Machine::extractCmd(const GCodeLine& gcodeline)
+    template<typename T>
+    Instruction<T> Machine<T>::extractCmd(const GCodeLine& gcodeline)
     {
         std::cout << gcodeline.first << ": " << gcodeline.second << std::endl; // Todo: Use a propper logger
 

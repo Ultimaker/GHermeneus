@@ -11,19 +11,11 @@
 #include <mutex>
 #include <string_view>
 
+#include "Instruction.h"
+
 namespace GHermeneus
 {
-    struct Parameter
-    {
-        Parameter(const std::string_view& param, const double& value)
-                : param(param), value(value)
-        {};
-        const std::string_view param;
-        const double value;
-    };
-
-    using CmdLine = std::tuple<size_t, std::string_view, std::vector<Parameter>>;
-
+    template<typename T>
     class Machine
     {
     public:
@@ -33,19 +25,19 @@ namespace GHermeneus
 
         void parse(const std::string_view& gcode);
 
-        friend std::ostream& operator<<(std::ostream& os, const Machine& machine);
+        friend std::ostream& operator<<(std::ostream& os, const Machine<T>& machine);
 
-        friend Machine& operator<<(Machine& machine, const std::string_view& gcode);
+        friend Machine<T>& operator<<(Machine<T>& machine, const std::string_view& gcode);
 
     private:
 
         void extractLines(const std::string_view& gcode);
 
-        [[nodiscard]] static CmdLine extractCmd(const GCodeLine& gcodeline);
+        [[nodiscard]] static Instruction<T> extractCmd(const GCodeLine& gcodeline);
 
         std::string_view gcode;
         std::vector<GCodeLine> lines;
-        std::vector<CmdLine> cmdlines;
+        std::vector<Instruction<T>> cmdlines;
         std::mutex cmdlines_mutex;
 
     };

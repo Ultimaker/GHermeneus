@@ -3,11 +3,16 @@ project(GHermeneus)
 
 set(SRC_FILES
         src/Machine.cpp
-        src/GCode.cpp)
+        src/Instruction.cpp
+        src/GCode.cpp
+        src/Dialects/Marlin.cpp)
 
 set(HDR_FILES
         include/GHermeneus/Machine.h
-        include/GHermeneus/GCode.h)
+        include/GHermeneus/Instruction.h
+        include/GHermeneus/StateSpaceVector.h
+        include/GHermeneus/GCode.h
+        include/GHermeneus/Dialects/Marlin.h)
 
 add_library(GHermeneus SHARED ${SRC_FILES} ${HDR_FILES})
 conan_target_link_libraries(GHermeneus)

@@ -8,30 +8,34 @@
 #include <unordered_map>
 #include <string_view>
 
+#include "Instruction.h"
+
 namespace GHermeneus::GCode
 {
-    using CmdMap_t = std::unordered_map<std::string_view, int>; // Todo map to cmd_handler_functions
-    using ParamMap_t = std::unordered_map<std::string_view, int>; // Todo map to cmd_handler_functions
+    template<typename T>
+    using GCodeFunction = std::function<static T(const T&, const Parameters&)>;
 
-    static const CmdMap_t Cmd
-            {
-                    {"G0",  1},
-                    {"G1",  2},
-                    {"G92", 3},
-                    {"M82", 4},
-                    {"T0",  5}
-            };
+    template<typename T>
+    using CmdMap = std::unordered_map<std::string_view, T>;
 
-    static const ParamMap_t Param
-            {
-                    {"E", 1},
-                    {"F", 1},
-                    {"S", 1},
-                    {"X", 1},
-                    {"Y", 1},
-                    {"Z", 1}
-            };
+    template<typename T>
+    using ParamMap = std::unordered_map<std::string_view, T>;
 
+    template<typename T>
+    class Transform
+    {
+    public:
+        virtual Transform<T>() {};
+
+        T Cmd(const std::string_view& key);
+
+        T Param(const std::string_view& key);
+
+    protected:
+        const CmdMap<T> cmdMap;
+
+        const ParamMap<T> paramMap;
+    };
 }
 
 #endif //GCODEHERMENEUS_GCODE_H

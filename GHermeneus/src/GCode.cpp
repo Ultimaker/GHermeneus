@@ -6,5 +6,15 @@
 
 namespace GHermeneus::GCode
 {
+    template<typename T>
+    T Transform<T>::Cmd(const std::string_view& key)
+    {
+        return cmdMap.at(key);
+    }
 
+    template<typename T>
+    T Transform<T>::Param(const std::string_view& key)
+    {
+        return paramMap.at(key);
+    }
 }
