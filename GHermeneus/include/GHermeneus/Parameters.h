@@ -32,6 +32,6 @@ namespace GHermeneus
     };
 
     template<typename T = double>
-    using Parameters = std::vector<Parameter<double>>;  //<! Vector of Parameter of type T default = double
+    using Parameters = std::vector<Parameter<T>>;  //<! Vector of Parameter of type T default = double
 }
 #endif //GCODEHERMENEUS_PARAMETERS_H
