@@ -4,7 +4,7 @@
 
 #include "../../include/GHermeneus/Dialects/Marlin.h"
 
-namespace GHermeneus::GCode::Dialects::Marlin
+namespace GHermeneus::Dialects::Marlin
 {
 
     SSV Marlin::G0(const SSV& prev, const Parameters& param)

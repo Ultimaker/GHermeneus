@@ -10,7 +10,7 @@
 #include "../GCode.h"
 #include "../Machine.h"
 
-namespace GHermeneus::GCode::Dialects::Marlin
+namespace GHermeneus::Dialects::Marlin
 {
     static SSV G0(const SSV& prev, const Parameters& param);
 

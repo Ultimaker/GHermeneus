@@ -6,22 +6,26 @@
 
 namespace GHermeneus
 {
-    bool GHermeneus::Instruction::operator<(const GHermeneus::Instruction& rhs) const
+    template<typename T>
+    bool Instruction<T>::operator<(const Instruction<T>& rhs) const
     {
         return line_no < rhs.line_no;
     }
 
-    bool GHermeneus::Instruction::operator>(const GHermeneus::Instruction& rhs) const
+    template<typename T>
+    bool Instruction<T>::operator>(const Instruction<T>& rhs) const
     {
         return rhs < *this;
     }
 
-    bool GHermeneus::Instruction::operator<=(const GHermeneus::Instruction& rhs) const
+    template<typename T>
+    bool Instruction<T>::operator<=(const Instruction<T>& rhs) const
     {
         return !(rhs < *this);
     }
 
-    bool GHermeneus::Instruction::operator>=(const GHermeneus::Instruction& rhs) const
+    template<typename T>
+    bool Instruction<T>::operator>=(const Instruction<T>& rhs) const
     {
         return !(*this < rhs);
     }

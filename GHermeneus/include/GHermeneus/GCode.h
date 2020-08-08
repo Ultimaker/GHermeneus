@@ -10,7 +10,7 @@
 
 #include "Instruction.h"
 
-namespace GHermeneus::GCode
+namespace GHermeneus
 {
     template<typename T>
     using GCodeFunction = std::function<static T(const T&, const Parameters&)>;

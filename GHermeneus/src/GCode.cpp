@@ -4,7 +4,7 @@
 
 #include "../include/GHermeneus/GCode.h"
 
-namespace GHermeneus::GCode
+namespace GHermeneus
 {
     template<typename T>
     T Transform<T>::Cmd(const std::string_view& key)

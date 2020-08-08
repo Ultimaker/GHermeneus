@@ -8,6 +8,7 @@ set(SRC_FILES
         src/Dialects/Marlin.cpp)
 
 set(HDR_FILES
+        include/GHermeneus/GHermeneus.h
         include/GHermeneus/Machine.h
         include/GHermeneus/Instruction.h
         include/GHermeneus/StateSpaceVector.h

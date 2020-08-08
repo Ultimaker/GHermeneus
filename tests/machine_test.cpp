@@ -7,7 +7,7 @@
 #include <iostream>
 #include <functional>
 
-#include "GHermeneus/Machine.h"
+#include "GHermeneus/GHermeneus.h"
 
 
 using namespace std::literals;
@@ -31,7 +31,8 @@ TEST(MachineTestSuite, ParseGCode)
     };
     const auto gcode = std::string_view {GCode};
 
-    auto machine = GHermeneus::Machine();
+    using namespace GHermeneus::Dialects::Marlin;
+    auto machine = MarlinMachine();
     machine << gcode;
     std::cout << machine;
 }

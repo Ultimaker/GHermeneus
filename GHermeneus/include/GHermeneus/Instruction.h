@@ -59,7 +59,7 @@ namespace GHermeneus
 
         bool operator>=(const Instruction& rhs) const;
 
-        T operator(const T& prev, const GCode::Transform<GCode::GCodeFunction<T>>& transform)()
+        T operator(const T& prev, const Transform<GCodeFunction<T>>& transform)()
         {
             T value = transform.Cmd(cmd, params);
             return value;
