@@ -6,7 +6,6 @@
 #define GCODEHERMENEUS_MARLIN_H
 
 #include "../StateSpaceVector.h"
-#include "../Instruction.h"
 #include "../GCode.h"
 #include "../Machine.h"
 
@@ -24,10 +23,10 @@ namespace GHermeneus::Dialects::Marlin
     public:
         MarlinTransform() :
                 Transform<GCodeFunction<MarlinSSV, double>>(
-                 {{"G0", G0},
-                       {"G1", G0},
-                       {"G92", G92}},
-                {{"temp", G0}})
+                        {{"G0",  G0},
+                         {"G1",  G0},
+                         {"G92", G92}},
+                        {{"temp", G0}})
         {};
 
     };

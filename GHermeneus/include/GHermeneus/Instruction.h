@@ -40,13 +40,25 @@ namespace GHermeneus
         const std::string_view cmd;
         const Parameters<T> params;
 
-        bool operator<(const Instruction<SSV_T, T>& rhs) const;
+        bool operator<(const Instruction<SSV_T, T>& rhs) const
+        {
+            return line_no < rhs.line_no;
+        };
 
-        bool operator>(const Instruction<SSV_T, T>& rhs) const;
+        bool operator>(const Instruction<SSV_T, T>& rhs) const
+        {
+            return rhs < *this;
+        };
 
-        bool operator<=(const Instruction<SSV_T, T>& rhs) const;
+        bool operator<=(const Instruction<SSV_T, T>& rhs) const
+        {
+            return !(rhs < *this);
+        };
 
-        bool operator>=(const Instruction<SSV_T, T>& rhs) const;
+        bool operator>=(const Instruction<SSV_T, T>& rhs) const
+        {
+            return !(*this < rhs);
+        };
 
         /*!
          * Returns the delta State Space Vector according to a dialect transform.
@@ -58,7 +70,10 @@ namespace GHermeneus
          * @param The Transform<GCodeFunction<SSV_T, T>> instance where the GCode Dialect is coupled to a GCodeFunction
          * @return The Delta State Space Vector of type SSV_T
          */
-        SSV_T operator()(const Transform<GCodeFunction<SSV_T, T>>& transform);
+        SSV_T operator()(const Transform<GCodeFunction<SSV_T, T>>& transform)
+        {
+            return transform.Cmd(cmd, params);
+        };
     };
 }
 

@@ -29,13 +29,18 @@ namespace GHermeneus
     {
     public:
         Transform<GCFUNC_T>(const CmdMap<GCFUNC_T>& cmd, const ParamMap<GCFUNC_T>& param) :
-                cmdMap(cmd),
-                paramMap(param)
+                cmdMap(cmd), paramMap(param)
         {};
 
-        GCFUNC_T Cmd(const std::string_view& key);
+        GCFUNC_T Cmd(const std::string_view& key)
+        {
+            return cmdMap.at(key);
+        };
 
-        GCFUNC_T Param(const std::string_view& key);
+        GCFUNC_T Param(const std::string_view& key)
+        {
+            return paramMap.at(key);
+        };
 
     protected:
         const CmdMap<GCFUNC_T> cmdMap;

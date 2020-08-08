@@ -2,9 +2,6 @@ cmake_minimum_required(VERSION 3.17)
 project(GHermeneus)
 
 set(SRC_FILES
-        src/Machine.cpp
-        src/Instruction.cpp
-        src/GCode.cpp
         src/Dialects/Marlin.cpp)
 
 set(HDR_FILES
