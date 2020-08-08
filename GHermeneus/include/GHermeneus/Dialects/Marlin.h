@@ -12,23 +12,27 @@
 
 namespace GHermeneus::Dialects::Marlin
 {
-    static SSV G0(const SSV& prev, const Parameters& param);
+    using MarlinParameters = Parameters<double>;
+    using MarlinSSV = StateSpaceVector<double, 10>; // n = t, x, y, z, x_dot, y_dot, z_dot, e, e_dot, T
 
-    static SSV G92(const SSV& prev, const Parameters& param);
+    static MarlinSSV G0(const MarlinSSV& prev, const MarlinParameters& param);
 
-    class MarlinTransform : public Transform<GCodeFunction<SSV>>
+    static MarlinSSV G92(const MarlinSSV& prev, const MarlinParameters& param);
+
+    class MarlinTransform : public Transform<GCodeFunction<MarlinSSV, double>>
     {
-        // Todo: fix initialization of unordered_map using the initializer list
+    public:
         MarlinTransform() :
-                cmdMap{{"G0": G0},
-                       {"G1": G0},
-                       {"G92": G92}},
-                paramMap{}
+                Transform<GCodeFunction<MarlinSSV, double>>(
+                 {{"G0", G0},
+                       {"G1", G0},
+                       {"G92", G92}},
+                {{"temp", G0}})
         {};
 
     };
 
-    using MarlinMachine = Machine<SSV>;
+    using MarlinMachine = Machine<MarlinSSV, double>;
 
 }
 

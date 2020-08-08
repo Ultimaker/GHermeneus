@@ -7,34 +7,40 @@
 
 #include <unordered_map>
 #include <string_view>
+#include <functional>
 
-#include "Instruction.h"
+#include "Parameters.h"
 
 namespace GHermeneus
 {
-    template<typename T>
-    using GCodeFunction = std::function<static T(const T&, const Parameters&)>;
+    using Line = std::pair<size_t, std::string_view>;
 
-    template<typename T>
-    using CmdMap = std::unordered_map<std::string_view, T>;
+    template<typename SSV_T, typename T>
+    using GCodeFunction = std::function<SSV_T(const SSV_T&, const Parameters<T>&)>;
 
-    template<typename T>
-    using ParamMap = std::unordered_map<std::string_view, T>;
+    template<typename GCFUNC_T>
+    using CmdMap = std::unordered_map<std::string_view, GCFUNC_T>;
 
-    template<typename T>
+    template<typename GCFUNC_T>
+    using ParamMap = std::unordered_map<std::string_view, GCFUNC_T>; // Todo this should probably not be a GCFUNC_T
+
+    template<typename GCFUNC_T>
     class Transform
     {
     public:
-        virtual Transform<T>() {};
+        Transform<GCFUNC_T>(const CmdMap<GCFUNC_T>& cmd, const ParamMap<GCFUNC_T>& param) :
+                cmdMap(cmd),
+                paramMap(param)
+        {};
 
-        T Cmd(const std::string_view& key);
+        GCFUNC_T Cmd(const std::string_view& key);
 
-        T Param(const std::string_view& key);
+        GCFUNC_T Param(const std::string_view& key);
 
     protected:
-        const CmdMap<T> cmdMap;
+        const CmdMap<GCFUNC_T> cmdMap;
 
-        const ParamMap<T> paramMap;
+        const ParamMap<GCFUNC_T> paramMap;
     };
 }
 

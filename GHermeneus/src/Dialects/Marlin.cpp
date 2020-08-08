@@ -7,15 +7,15 @@
 namespace GHermeneus::Dialects::Marlin
 {
 
-    SSV Marlin::G0(const SSV& prev, const Parameters& param)
+    MarlinSSV G0(const MarlinSSV& prev, const MarlinParameters& param)
     {
         // Todo: transform the previous state space vector into the next according to the param
-        return GHermeneus::SSV();
+        return MarlinSSV();
     }
 
-    SSV G92(const SSV& prev, const Parameters& param)
+    MarlinSSV G92(const MarlinSSV & prev, const MarlinParameters& param)
     {
         // Todo: transform the previous state space vector into the next according to the param
-        return GHermeneus::SSV();
+        return MarlinSSV();
     }
 }

@@ -13,6 +13,7 @@ set(HDR_FILES
         include/GHermeneus/Instruction.h
         include/GHermeneus/StateSpaceVector.h
         include/GHermeneus/GCode.h
+        include/GHermeneus/Parameters.h
         include/GHermeneus/Dialects/Marlin.h)
 
 add_library(GHermeneus SHARED ${SRC_FILES} ${HDR_FILES})

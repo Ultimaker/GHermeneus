@@ -32,7 +32,7 @@ TEST(MachineTestSuite, ParseGCode)
     const auto gcode = std::string_view {GCode};
 
     using namespace GHermeneus::Dialects::Marlin;
-    auto machine = MarlinMachine();
-    machine << gcode;
-    std::cout << machine;
+    auto UM3 = MarlinMachine();
+    UM3 << gcode;
+    std::cout << UM3;
 }

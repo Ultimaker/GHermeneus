@@ -2,9 +2,6 @@
 // Created by peer23peer on 5/22/20.
 //
 
-#include "../include/GHermeneus/Machine.h"
-#include "../include/GHermeneus/GCode.h"
-
 #include <algorithm>
 #include <execution>
 
@@ -15,10 +12,14 @@
 #include <range/v3/view/take.hpp>
 #include <range/v3/view/drop.hpp>
 
+#include "../include/GHermeneus/Machine.h"
+#include "../include/GHermeneus/GCode.h"
+#include "../include/GHermeneus/Parameters.h"
+
 namespace GHermeneus
 {
-    template<typename T>
-    std::ostream& operator<<(std::ostream& os, const Machine<T>& machine)
+    template<typename SSV_T, typename T>
+    std::ostream& operator<<(std::ostream& os, const Machine<SSV_T, T>& machine)
     {
         for (const auto& cmdline : machine.cmdlines)
         {
@@ -33,27 +34,27 @@ namespace GHermeneus
         return os;
     }
 
-    template<typename T>
-    Machine<T>& operator<<(Machine<T>& machine, const std::string_view& gcode)
+    template<typename SSV_T, typename T>
+    Machine<SSV_T, T>& operator<<(Machine<SSV_T, T>& machine, const std::string_view& GCode)
     {
-        machine.parse(gcode);
+        machine.parse(GCode);
         return machine;
     }
 
-    template<typename T>
-    void Machine<T>::parse(const std::string_view& gcode)
+    template<typename SSV_T, typename T>
+    void Machine<SSV_T, T>::parse(const std::string_view& GCode)
     {
-        extractLines(gcode);
+        extractLines(GCode);
         cmdlines.reserve(lines.size());
         std::for_each(std::execution::par_unseq, lines.begin(), lines.end(), [&](auto line){
             std::lock_guard<std::mutex> guard(cmdlines_mutex);
-            cmdlines.push_back(extractCmd(line));
+            cmdlines.emplace_back(extractCmd(line));
         });
-        // TODO: Sort according to line number, or maybe use std::execution::par
+        std::sort(std::execution::par_unseq, cmdlines.begin(), cmdlines.end()); // Todo: check performance of diff execution policies
     }
 
-    template<typename T>
-    void Machine<T>::extractLines(const std::string_view& gcode)
+    template<typename SSV_T, typename T>
+    void Machine<SSV_T, T>::extractLines(const std::string_view& GCode)
     {
         // TODO: keep in mind CRLF and LF
         lines = gcode
@@ -65,12 +66,14 @@ namespace GHermeneus
                 | ranges::to_vector;
     }
 
-    template<typename T>
-    Instruction<T> Machine<T>::extractCmd(const GCodeLine& gcodeline)
+    template<typename SSV_T, typename T>
+    Instruction<SSV_T, T> Machine<SSV_T, T>::extractCmd(const Line& GCodeline)
     {
-        std::cout << gcodeline.first << ": " << gcodeline.second << std::endl; // Todo: Use a propper logger
+#ifndef NDEBUG
+        std::cout << GCodeline.first << ": " << GCodeline.second << std::endl; // Todo: Use a proper logger
+#endif
 
-        auto &&[lineno, gcode] = gcodeline;
+        auto &&[lineno, gcode] = GCodeline;
 
         // Split line in instruction and comment
         auto split_line = gcode
@@ -97,7 +100,7 @@ namespace GHermeneus
             auto val = param
                        | ranges::views::drop(1);
             auto value = std::string(&*val.begin(), ranges::distance(val));
-            return Parameter(std::string_view(&*identifier.begin(), ranges::distance(identifier)), std::stod(value));
+            return Parameter<T>(std::string_view(&*identifier.begin(), ranges::distance(identifier)), std::stod(value));
         })
                       | ranges::to_vector;
         return std::make_tuple(lineno, *cmd.begin(), params);
