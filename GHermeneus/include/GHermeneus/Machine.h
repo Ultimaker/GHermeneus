@@ -117,7 +117,7 @@ namespace GHermeneus
                            | ranges::views::drop(1);
                 auto value = std::string(&*val.begin(), ranges::distance(val));
                 return Parameter<T>(std::string_view(&*identifier.begin(), ranges::distance(identifier)),
-                                    std::stod(value));
+                                    std::stod(value)); // Todo: how to process the conversion of text to different T types
             })
                           | ranges::to_vector;
             return Instruction<SSV_T, T>(lineno, *cmd.begin(), params);

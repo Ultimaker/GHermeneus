@@ -22,13 +22,18 @@ namespace GHermeneus
                 value(value)
         {};
 
-        Parameter(Parameter&& parameter) noexcept:
-                param(parameter.param),
-                value(parameter.value)
+        Parameter(Parameter<T>&& parameter) noexcept:
+                param{std::move(parameter.param)},
+                value{parameter.value}
         {};
 
-        const std::string_view param;
-        const T value;
+        Parameter(const Parameter<T>& parameter) noexcept:
+                param{parameter.param},
+                value{parameter.value}
+        {};
+
+        std::string_view param;
+        T value;
     };
 
     template<typename T = double>
