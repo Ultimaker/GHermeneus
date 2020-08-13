@@ -28,6 +28,29 @@
 
 namespace GHermeneus
 {
+    /*!
+     * This is the workhorse, here the GCode is processed and converted to different output types,
+     * such as protobufs, CSV text streams, Numpy objects.
+     *
+     * Actual implementation of this abstract type is usually done for each type GCode dialect. A Dialect is a namespace
+     * such as the GHermeneus::Dialects::Marlin. Here the Machine is defined as:
+     *
+     *      using MarlinSSV = StateSpaceVector<double, 10>; // n = t, x, y, z, x_dot, y_dot, z_dot, e, e_dot, T
+     *      using MarlinMachine = Machine<MarlinSSV, double>;
+     *
+     * Normal usage of a DialectMachine would then be:
+     *
+     *      using namespace GHermeneus::Dialects::Marlin;
+     *      auto UM3 = MarlinMachine();
+     *      UM3 << gcode;
+     *      std::cout << UM3;
+     *
+     * Which will output a CSV formatted array of the instructions (not yet implemented fully)
+     *
+     * @brief The workhorse behind this parser it will convert GCode to Instructions and different outputs
+     * @tparam SSV_T The type of the State Space Vector
+     * @tparam T  The primitive type of the State Space eq. double, int etc
+     */
     template<typename SSV_T, typename T>
     class Machine
     {
@@ -39,10 +62,16 @@ namespace GHermeneus
 
         virtual ~Machine() = default;
 
+        /*!
+         * @brief parse the GCode to the machine instruction vector
+         * @param GCode a string_view containing the GCode
+         */
         void parse(const std::string_view& GCode)
         {
             gcode = GCode;
-            extractLines(GCode);
+            extractLines(GCode); // extract the individual GCode lines
+
+            // Extract the Commands from each line this is done in an parallel unsequenced execution strategy
             cmdlines.reserve(lines.size());
             std::for_each(std::execution::par_unseq, lines.begin(), lines.end(), [&](Line& line) {
                 std::lock_guard<std::mutex> guard(cmdlines_mutex);
@@ -50,13 +79,20 @@ namespace GHermeneus
                 {
                     cmdlines.emplace_back(extractedCmd.value());
                 }});
+
+            // Sort the extracted commandlines
             std::sort(std::execution::par, cmdlines.begin(),
                       cmdlines.end()); // Todo: check performance of diff execution policies
         }
 
+        /*!
+         * @brief output the machines instruction vector to an output stream as in CSV format
+         * @param os Output stream
+         * @param machine A machine of type Machine<SSV_T, T>
+         * @return an output stream
+         */
         friend std::ostream& operator<<(std::ostream& os, const Machine<SSV_T, T>& machine)
         {
-
             for (const Instruction<SSV_T, T>& cmdline : machine.cmdlines)
             {
                 os << "line: " << cmdline.line_no << " command: " << cmdline.cmd << " Parameters ->";
@@ -69,6 +105,12 @@ namespace GHermeneus
             return os;
         };
 
+        /*!
+         * @brief Output the GCode stream to the Machines Instruction Vector
+         * @param machine The machine of type Machine<SSV_T, T>
+         * @param GCode the GCode as a string_view stream
+         * @return A machine of type Machine<SSV_T, T>
+         */
         friend Machine<SSV_T, T>& operator<<(Machine<SSV_T, T>& machine, const std::string_view& GCode)
         {
             machine.parse(GCode);
@@ -77,6 +119,10 @@ namespace GHermeneus
 
     private:
 
+        /*!
+         * @brief extract the individual lines from the GCode
+         * @param GCode a string_view containing the GCode
+         */
         void extractLines(const std::string_view& GCode)
         {
             // TODO: keep in mind CRLF and LF
@@ -88,6 +134,12 @@ namespace GHermeneus
                     | ranges::to_vector;
         };
 
+        /*!
+         * @brief Extract an instruction of type Instruction<SSV_T, T> from a GCode line. If the line contains no
+         *  instruction it is a std::nullopt
+         * @param GCodeline string_view containing the line with command, the relevant parameters and/or a comment.
+         * @return an optional instruction of type Instruction<SSV_T, T>
+         */
         [[nodiscard]] static std::optional<Instruction<SSV_T, T>> extractCmd(const Line& GCodeline)
         {
 #ifndef NDEBUG
@@ -127,10 +179,10 @@ namespace GHermeneus
             return Instruction<SSV_T, T>(lineno, cmd, params);
         };
 
-        std::string_view gcode;
-        std::vector<Line> lines;
-        std::vector<Instruction<SSV_T, T>> cmdlines;
-        std::mutex cmdlines_mutex;
+        std::string_view gcode; //!< A string_view with the full gcode
+        std::vector<Line> lines; //!< A vector of Lines, a Line is a pair with the line number and the string_view
+        std::vector<Instruction<SSV_T, T>> cmdlines; //!< A vector of instructions converted from the lines
+        std::mutex cmdlines_mutex; //!< The mutex for the cmdlines
     };
 }
 
