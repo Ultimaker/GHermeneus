@@ -44,9 +44,9 @@ namespace GHermeneus
                 params(instruction.params)
         {};
 
-        const size_t line_no;
-        const std::string_view cmd;
-        Parameters<T> params;
+        const size_t line_no; //<! The line number
+        const std::string_view cmd; //<! The command key
+        Parameters<T> params; //<! A vector of extracted parameters
 
         Instruction<SSV_T, T>& operator=(const Instruction<SSV_T, T>& rhs)
         {
@@ -78,6 +78,8 @@ namespace GHermeneus
          * The previous extracted cmd key is used to look up the corresponding function. To which the previous extracted
          * parameters and their value are passed. It will return the delta State Space Vector which can be added to the
          * n - 1  State Space Vector or subtracted from the n + 1 State Space Vector.
+         *
+         * Todo: Keep in mind that the delta State Space Vector might also be an absolute State Space Vector
          *
          * @brief returns the delta State Space Vector according to a dialect transform
          * @param The Transform<GCodeFunction<SSV_T, T>> instance where the GCode Dialect is coupled to a GCodeFunction
