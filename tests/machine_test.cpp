@@ -21,7 +21,7 @@ TEST(MachineTestSuite, ParseGCode)
         "T0\n" // Tool 0
         "M82 ;absolute extrusion mode\n" // set extrusion mode to absolute
         "G92 E0\n" // set the extrusion axis to position 0
-        ";LAYER:0"
+        ";LAYER:0\n"
         "G0 F15000 X100 Y75.75 Z2\n" // Move to 100, 75.75, 2 with a feedrate of 15000
         "G1 F1500 E-6.5\n" // retract filament 6.5 mm with a feedrate of 1500
         "G1 F600 Z0.27\n" // move tool to a height of 2.27 with a feedrate of 600
@@ -31,8 +31,8 @@ TEST(MachineTestSuite, ParseGCode)
     };
     const auto gcode = std::string_view {GCode};
 
-//    using namespace GHermeneus::Dialects::Marlin;
-//    auto UM3 = MarlinMachine();
-//    UM3 << gcode;
-//    std::cout << UM3;
+    using namespace GHermeneus::Dialects::Marlin;
+    auto UM3 = MarlinMachine();
+    UM3 << gcode;
+    std::cout << UM3;
 }
