@@ -43,7 +43,7 @@ namespace GHermeneus
 
     /*!
      *
-     * Each dialect has to defined a class which inherits from this on, the mapping of the keys takes place in the
+     * Each dialect has to define a class which inherits from this on, the mapping of the keys takes place in the
      * constructor:
      *
      * static MarlinSSV G0(const MarlinSSV& prev, const MarlinParameters& param);

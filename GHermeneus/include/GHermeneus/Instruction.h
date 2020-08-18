@@ -15,7 +15,7 @@ namespace GHermeneus
 {
     /*!
      * An dialect interpreted GCode line which consist of a corresponding line number, command key (e.q. G0, M104) and
-     * a vector of Parameters of type double.
+     * a vector of Parameters of type T.
      *
      * @brief An interpreted GCode function
      * @tparam SSV_T the State Space Vector type

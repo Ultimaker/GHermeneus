@@ -10,7 +10,7 @@
 namespace GHermeneus
 {
     /*!
-     * The State Space Vector are all variables that describe the state of the machine at
+     * The State Space Vector contains all variables that describes the state of the machine at
      * a certain time, these are usually:
      *  - t: time (this is a required parameter, since the GCode only contains movements and actions)
      *  - x: x coordinates of the printhead relative to 0
