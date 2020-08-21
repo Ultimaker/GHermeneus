@@ -11,6 +11,7 @@
 #include <string_view>
 #include <vector>
 #include <iostream>
+#include <fstream>
 #include <optional>
 
 #include <range/v3/distance.hpp>
@@ -114,6 +115,21 @@ namespace GHermeneus
             return machine;
         };
 
+        /*!
+         * @brief Output the GCode filestream to the Machines Instruction Vector
+         * @param machine The machine of type Machine<SSV_T, T>
+         * @param file Text file stream
+         * @return A machine of type Machine<SSV_T, T>
+         */
+        friend Machine<SSV_T, T>& operator<<(Machine<SSV_T, T>& machine, std::ifstream& file)
+        {
+            machine.rawGCode.assign((std::istreambuf_iterator<char>(file)),
+                                    (std::istreambuf_iterator<char>()));
+            std::string_view gcode{machine.rawGCode};
+            machine << gcode;
+            return machine;
+        }
+
     private:
 
         /*!
@@ -176,6 +192,7 @@ namespace GHermeneus
             return Instruction<SSV_T, T>(lineno, cmd, params);
         };
 
+        std::string rawGCode; //!< The raw GCode (needed to store files and make sure the data of \p gcode stays in scope
         std::string_view gcode; //!< A string_view with the full gcode
         std::vector<Line> lines; //!< A vector of Lines, a Line is a pair with the line number and the string_view
         std::vector<Instruction<SSV_T, T>> cmdlines; //!< A vector of instructions converted from the lines

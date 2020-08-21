@@ -5,6 +5,7 @@
 
 #include <string_view>
 #include <iostream>
+#include <fstream>
 #include <functional>
 
 #include "GHermeneus/GHermeneus.h"
@@ -34,5 +35,14 @@ TEST(MachineTestSuite, ParseGCode)
     using namespace GHermeneus::Dialects::Marlin;
     auto UM3 = MarlinMachine();
     UM3 << gcode;
+    std::cout << UM3;
+}
+
+TEST(MachineTestSuite, ParseGCodeFile)
+{
+    std::ifstream gcode_file("simple.gcode");
+    using namespace GHermeneus::Dialects::Marlin;
+    auto UM3 = MarlinMachine();
+    UM3 << gcode_file;
     std::cout << UM3;
 }
