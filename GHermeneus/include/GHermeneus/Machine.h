@@ -11,7 +11,6 @@
 #include <string_view>
 #include <vector>
 #include <iostream>
-#include <mutex>
 #include <optional>
 
 #include <range/v3/distance.hpp>
@@ -71,18 +70,16 @@ namespace GHermeneus
             gcode = GCode;
             extractLines(GCode); // extract the individual GCode lines
 
-            // Extract the Commands from each line this is done in an parallel unsequenced execution strategy
-            cmdlines.reserve(lines.size());
-            std::for_each(std::execution::par_unseq, lines.begin(), lines.end(), [&](Line& line) {
-                std::lock_guard<std::mutex> guard(cmdlines_mutex);
-                if (auto extractedCmd = extractCmd(line))
-                {
-                    cmdlines.emplace_back(extractedCmd.value());
-                }});
-
-            // Sort the extracted commandlines
-            std::sort(std::execution::par, cmdlines.begin(),
-                      cmdlines.end()); // Todo: check performance of diff execution policies
+            // Extract the Commands from each line
+            std::vector<std::optional<Instruction<SSV_T, T>>> extractedCmds(lines.size());
+            std::transform(std::execution::par_unseq, lines.begin(), lines.end(), extractedCmds.begin(), extractCmd);
+            extractedCmds.erase(std::remove_if(std::execution::par_unseq, extractedCmds.begin(), extractedCmds.end(), [](const auto& cmd){
+                return !cmd; }), extractedCmds.end());
+            cmdlines.resize(extractedCmds.size());
+            std::transform(std::execution::par_unseq, extractedCmds.begin(), extractedCmds.end(), cmdlines.begin(), [](const auto& cmd) {
+                return cmd.value();
+            } );
+            std::sort(std::execution::par, cmdlines.begin(), cmdlines.end());
         }
 
         /*!
@@ -182,7 +179,6 @@ namespace GHermeneus
         std::string_view gcode; //!< A string_view with the full gcode
         std::vector<Line> lines; //!< A vector of Lines, a Line is a pair with the line number and the string_view
         std::vector<Instruction<SSV_T, T>> cmdlines; //!< A vector of instructions converted from the lines
-        std::mutex cmdlines_mutex; //!< The mutex for the cmdlines
     };
 }
 

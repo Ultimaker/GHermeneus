@@ -15,4 +15,4 @@ set(HDR_FILES
 
 add_library(GHermeneus SHARED ${SRC_FILES} ${HDR_FILES})
 conan_target_link_libraries(GHermeneus)
-target_compile_features(GHermeneus PRIVATE cxx_std_17)
+target_compile_features(GHermeneus PRIVATE cxx_std_20)
