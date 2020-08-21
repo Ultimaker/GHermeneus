@@ -11,7 +11,7 @@ class GHermeneusConan(ConanFile):
     description = "Fast GCode interpreter"
     topics = ("GCode", "3D printing", "Path generator", "Ultimaker", "Cura")
     settings = "os", "compiler", "build_type", "arch"
-    requires = "eigen/3.3.7@conan/stable", "range-v3/0.10.0@ericniebler/stable"
+    requires = "eigen/3.3.7@conan/stable", "range-v3/0.10.0@ericniebler/stable", "tbb/2020.1"
     build_requires = "gtest/1.10.0"
     options = {"shared": [True, False], "build_tests": [True, False]}
     default_options = {"shared": False, "build_tests": True}
