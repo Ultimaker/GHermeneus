@@ -7,7 +7,13 @@ else()
     message(WARNING "The file conanbuildinfo.cmake doesn't exist, you have to run conan install first")
 endif()
 
+option(BUILD_TESTS "Build en perform unit tests" ON)
 add_subdirectory(GHermeneus)
 if (BUILD_TESTS)
     add_subdirectory(tests)
+endif()
+
+option(BUILD_BENCHMARKS "Build en perform code benchmarks" ON)
+if (BUILD_BENCHMARKS)
+    add_subdirectory(benchmark)
 endif()

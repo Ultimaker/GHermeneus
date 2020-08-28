@@ -11,15 +11,23 @@ class GHermeneusConan(ConanFile):
     description = "Fast GCode interpreter"
     topics = ("GCode", "3D printing", "Path generator", "Ultimaker", "Cura")
     settings = "os", "compiler", "build_type", "arch"
-    requires = "eigen/3.3.7@conan/stable", "range-v3/0.10.0@ericniebler/stable", "tbb/2020.1"
-    build_requires = "gtest/1.10.0"
-    options = {"shared": [True, False], "build_tests": [True, False]}
-    default_options = {"shared": False, "build_tests": True}
+    options = {"shared": [True, False], "build_tests": [True, False], "build_benchmarks": [True, False]}
+    default_options = {"shared": False, "build_tests": True, "build_benchmarks": True}
     generators = "cmake"
+
+    def requirements(self):
+        self.requires.add("eigen/3.3.7@conan/stable")
+        self.requires.add("range-v3/0.10.0@ericniebler/stable")
+        self.requires.add("tbb/2020.1")
+        if self.options.build_tests:
+            self.requires.add("gtest/1.10.0")
+        if self.options.build_benchmarks:
+            self.requires.add("benchmark/1.5.0")
 
     def configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["BUILD_TESTS"] = self.options.build_tests
+        cmake.definitions["BUILD_BENCHMARKS"] = self.options.build_benchmarks
         cmake.configure()
         return cmake
 
@@ -28,6 +36,7 @@ class GHermeneusConan(ConanFile):
         cmake.build()
         if self.options.build_tests:
             cmake.test()
+
 
     def package(self):
         self.copy("*.h", dst="include", src="GHermeneus")
