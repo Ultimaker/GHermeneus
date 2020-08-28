@@ -56,9 +56,9 @@ namespace GHermeneus
     {
     public:
 
-        Machine() = default;
+        Machine() : parallelExecution{ true } {};
 
-        Machine(Machine<SSV_T, T>&& machine)  noexcept = default;
+        Machine(Machine<SSV_T, T>&& machine) noexcept = default;
 
         virtual ~Machine() = default;
 
@@ -73,14 +73,28 @@ namespace GHermeneus
 
             // Extract the Commands from each line
             std::vector<std::optional<Instruction<SSV_T, T>>> extractedCmds(lines.size());
-            std::transform(std::execution::par_unseq, lines.begin(), lines.end(), extractedCmds.begin(), extractCmd);
-            extractedCmds.erase(std::remove_if(std::execution::par_unseq, extractedCmds.begin(), extractedCmds.end(), [](const auto& cmd){
+            if (parallelExecution)
+                std::transform(std::execution::par, lines.begin(), lines.end(), extractedCmds.begin(), extractCmd);
+            else
+                std::transform(std::execution::seq, lines.begin(), lines.end(), extractedCmds.begin(), extractCmd);
+            extractedCmds.erase(std::remove_if(std::execution::seq, extractedCmds.begin(), extractedCmds.end(), [](const auto& cmd){
                 return !cmd; }), extractedCmds.end());
             cmdlines.resize(extractedCmds.size());
-            std::transform(std::execution::par_unseq, extractedCmds.begin(), extractedCmds.end(), cmdlines.begin(), [](const auto& cmd) {
-                return cmd.value();
-            } );
-            std::sort(std::execution::par, cmdlines.begin(), cmdlines.end());
+            if (parallelExecution)
+            {
+                std::transform(std::execution::par, extractedCmds.begin(), extractedCmds.end(), cmdlines.begin(),
+                               [](const auto& cmd) {
+                                   return cmd.value();
+                               });
+                std::sort(std::execution::par, cmdlines.begin(), cmdlines.end());
+            }
+            else
+            {
+                std::transform(std::execution::seq, extractedCmds.begin(), extractedCmds.end(), cmdlines.begin(),
+                               [](const auto& cmd) {
+                                   return cmd.value();
+                               });
+            }
         }
 
         /*!
@@ -128,6 +142,15 @@ namespace GHermeneus
             std::string_view gcode{machine.rawGCode};
             machine << gcode;
             return machine;
+        }
+
+        /*!
+         * @brief Allow for parallel execution, standard on
+         * @param parallelExecution true if parallel execution is allowed, false for sequenced execution
+         */
+        void setParallelExecution(bool parallelExecution)
+        {
+            Machine::parallelExecution = parallelExecution;
         }
 
     private:
@@ -196,6 +219,7 @@ namespace GHermeneus
         std::string_view gcode; //!< A string_view with the full gcode
         std::vector<Line> lines; //!< A vector of Lines, a Line is a pair with the line number and the string_view
         std::vector<Instruction<SSV_T, T>> cmdlines; //!< A vector of instructions converted from the lines
+        bool parallelExecution; //!< Indicating if parsing should be done in parallel
     };
 }
 
