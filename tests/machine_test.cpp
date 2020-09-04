@@ -40,7 +40,7 @@ TEST(MachineTestSuite, ParseGCode)
 
 TEST(MachineTestSuite, ParseGCodeFile)
 {
-    std::ifstream gcode_file("simple.gcode");
+    std::ifstream gcode_file("../resources/simple.gcode");
     using namespace GHermeneus::Dialects::Marlin;
     auto UM3 = MarlinMachine();
     UM3 << gcode_file;

@@ -7,6 +7,9 @@ else()
     message(WARNING "The file conanbuildinfo.cmake doesn't exist, you have to run conan install first")
 endif()
 
+set (source "${CMAKE_SOURCE_DIR}/resources")
+set (destination "${CMAKE_CURRENT_BINARY_DIR}/resources")
+
 option(BUILD_TESTS "Build en perform unit tests" ON)
 add_subdirectory(GHermeneus)
 if (BUILD_TESTS)
