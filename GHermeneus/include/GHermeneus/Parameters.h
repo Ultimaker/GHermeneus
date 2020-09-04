@@ -12,7 +12,7 @@ namespace GHermeneus
 {
 /*!
  * @brief A type containing the parameter key (e.q. X, Y, Z, F, E)
- * @tparam T the primative type of the parameter value, this should be the same as the primative type of the State Space
+ * @tparam T the primitive type of the parameter value, this should be the same as the primitive type of the State Space
  * Vector. Defaults to double
  */
     template<typename T = double>
