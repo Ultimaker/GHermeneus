@@ -25,7 +25,7 @@ namespace GHermeneus
      *  - T_bed: temperature of the bed
      *
      * @brief The State Space Vector describing the machine state
-     * @tparam T the primative type of the Eigen::Matrix
+     * @tparam T the primitive type of the Eigen::Matrix
      * @tparam n the number of variables describing the state
      */
     template<typename T, int n = 11> // n = t, x, y, z, x_dot, y_dot, z_dot, e, e_dot, T, T_bed
