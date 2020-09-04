@@ -6,13 +6,11 @@
 
 #include <string_view>
 #include <iostream>
-#include <fstream>
-#include <functional>
 
 #include "GHermeneus/GHermeneus.h"
 
-const static std::string simple_file{"../resources/simple.gcode"};
-const static std::string big_file{"../resources/big.gcode"};
+static const std::string simple_file{"../resources/simple.gcode"};
+static const std::string big_file{"../resources/big.gcode"};
 
 size_t get_nol(const std::string& filename)
 {

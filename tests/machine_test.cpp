@@ -5,8 +5,6 @@
 
 #include <string_view>
 #include <iostream>
-#include <fstream>
-#include <functional>
 
 #include "GHermeneus/GHermeneus.h"
 
