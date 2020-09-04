@@ -148,9 +148,9 @@ namespace GHermeneus
          * @brief Allow for parallel execution, standard on
          * @param parallelExecution true if parallel execution is allowed, false for sequenced execution
          */
-        void setParallelExecution(bool parallelExecution)
+        void setParallelExecution(bool parallel_execution)
         {
-            Machine::parallelExecution = parallelExecution;
+            Machine::parallelExecution = parallel_execution;
         }
 
     private:
