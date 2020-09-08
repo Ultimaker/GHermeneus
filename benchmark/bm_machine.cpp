@@ -4,19 +4,19 @@
 
 #include <benchmark/benchmark.h>
 
-#include <string_view>
 #include <iostream>
+#include <string_view>
 
 #include "GHermeneus/GHermeneus.h"
 
-static const std::string simple_file{"../resources/simple.gcode"};
-static const std::string big_file{"../resources/big.gcode"};
+static const std::string simple_file{ "../resources/simple.gcode" };
+static const std::string big_file{ "../resources/big.gcode" };
 
 size_t get_nol(const std::string& filename)
 {
     std::ifstream gcode_file(filename);
     std::string line;
-    size_t nol{0};
+    size_t nol{ 0 };
     while (std::getline(gcode_file, line))
     {
         nol++;

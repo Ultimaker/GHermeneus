@@ -7,4 +7,4 @@
 
 #include "Dialects/Marlin.h"
 
-#endif //GCODEHERMENEUS_GHERMENEUS_H
+#endif // GCODEHERMENEUS_GHERMENEUS_H
