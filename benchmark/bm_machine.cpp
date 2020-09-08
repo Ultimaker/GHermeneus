@@ -12,7 +12,7 @@
 static const std::string simple_file{ "../resources/simple.gcode" };
 static const std::string big_file{ "../resources/big.gcode" };
 
-size_t get_nol(const std::string& filename)
+size_t getNol(const std::string& filename)
 {
     std::ifstream gcode_file(filename);
     std::string line;
@@ -26,7 +26,7 @@ size_t get_nol(const std::string& filename)
 
 using namespace GHermeneus::Dialects::Marlin;
 
-static void BM_simple_file_parallel(benchmark::State& state)
+static void bmSimpleFileParallel(benchmark::State& state)
 {
     for (auto _ : state)
     {
@@ -36,12 +36,12 @@ static void BM_simple_file_parallel(benchmark::State& state)
         std::ifstream gcode_file(simple_file);
         UM3 << gcode_file;
     }
-    state.SetItemsProcessed(get_nol(simple_file));
+    state.SetItemsProcessed(getNol(simple_file));
 }
 
-BENCHMARK(BM_simple_file_parallel);
+BENCHMARK(bmSimpleFileParallel);
 
-static void BM_simple_file(benchmark::State& state)
+static void bmSimpleFile(benchmark::State& state)
 {
     for (auto _ : state)
     {
@@ -52,12 +52,12 @@ static void BM_simple_file(benchmark::State& state)
         std::ifstream gcode_file(simple_file);
         UM3 << gcode_file;
     }
-    state.SetItemsProcessed(get_nol(simple_file));
+    state.SetItemsProcessed(getNol(simple_file));
 }
 
-BENCHMARK(BM_simple_file);
+BENCHMARK(bmSimpleFile);
 
-static void BM_big_file_parallel(benchmark::State& state)
+static void bmBigFileParallel(benchmark::State& state)
 {
     for (auto _ : state)
     {
@@ -67,12 +67,12 @@ static void BM_big_file_parallel(benchmark::State& state)
         std::ifstream gcode_file(big_file);
         UM3 << gcode_file;
     }
-    state.SetItemsProcessed(get_nol(big_file));
+    state.SetItemsProcessed(getNol(big_file));
 }
 
-BENCHMARK(BM_big_file_parallel);
+BENCHMARK(bmBigFileParallel);
 
-static void BM_big_file(benchmark::State& state)
+static void bmBigFile(benchmark::State& state)
 {
     for (auto _ : state)
     {
@@ -83,9 +83,9 @@ static void BM_big_file(benchmark::State& state)
         std::ifstream gcode_file(big_file);
         UM3 << gcode_file;
     }
-    state.SetItemsProcessed(get_nol(big_file));
+    state.SetItemsProcessed(getNol(big_file));
 }
 
-BENCHMARK(BM_big_file);
+BENCHMARK(bmBigFile);
 
 BENCHMARK_MAIN();
