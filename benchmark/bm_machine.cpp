@@ -18,7 +18,9 @@ size_t get_nol(const std::string& filename)
     std::string line;
     size_t nol{0};
     while (std::getline(gcode_file, line))
+    {
         nol++;
+    }
     return nol;
 }
 

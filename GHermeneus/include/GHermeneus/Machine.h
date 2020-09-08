@@ -56,7 +56,7 @@ namespace GHermeneus
     {
     public:
 
-        Machine() : parallelExecution{ true } {};
+        Machine() : parallel_execution{true } {};
 
         Machine(Machine<SSV_T, T>&& machine) noexcept = default;
 
@@ -73,14 +73,18 @@ namespace GHermeneus
 
             // Extract the Commands from each line
             std::vector<std::optional<Instruction<SSV_T, T>>> extractedCmds(lines.size());
-            if (parallelExecution)
+            if (parallel_execution)
+            {
                 std::transform(std::execution::par, lines.begin(), lines.end(), extractedCmds.begin(), extractCmd);
+            }
             else
+            {
                 std::transform(std::execution::seq, lines.begin(), lines.end(), extractedCmds.begin(), extractCmd);
+            }
             extractedCmds.erase(std::remove_if(std::execution::seq, extractedCmds.begin(), extractedCmds.end(), [](const auto& cmd){
                 return !cmd; }), extractedCmds.end());
             cmdlines.resize(extractedCmds.size());
-            if (parallelExecution)
+            if (parallel_execution)
             {
                 std::transform(std::execution::par, extractedCmds.begin(), extractedCmds.end(), cmdlines.begin(),
                                [](const auto& cmd) {
@@ -137,9 +141,9 @@ namespace GHermeneus
          */
         friend Machine<SSV_T, T>& operator<<(Machine<SSV_T, T>& machine, std::ifstream& file)
         {
-            machine.rawGCode.assign((std::istreambuf_iterator<char>(file)),
-                                    (std::istreambuf_iterator<char>()));
-            std::string_view gcode{machine.rawGCode};
+            machine.raw_gcode.assign((std::istreambuf_iterator<char>(file)),
+                                     (std::istreambuf_iterator<char>()));
+            std::string_view gcode{machine.raw_gcode};
             machine << gcode;
             return machine;
         }
@@ -150,7 +154,7 @@ namespace GHermeneus
          */
         void setParallelExecution(bool parallel_execution)
         {
-            Machine::parallelExecution = parallel_execution;
+            Machine::parallel_execution = parallel_execution;
         }
 
     private:
@@ -215,11 +219,11 @@ namespace GHermeneus
             return Instruction<SSV_T, T>(lineno, cmd, params);
         };
 
-        std::string rawGCode; //!< The raw GCode (needed to store files and make sure the data of \p gcode stays in scope
+        std::string raw_gcode; //!< The raw GCode (needed to store files and make sure the data of \p gcode stays in scope
         std::string_view gcode; //!< A string_view with the full gcode
         std::vector<Line> lines; //!< A vector of Lines, a Line is a pair with the line number and the string_view
         std::vector<Instruction<SSV_T, T>> cmdlines; //!< A vector of instructions converted from the lines
-        bool parallelExecution; //!< Indicating if parsing should be done in parallel
+        bool parallel_execution; //!< Indicating if parsing should be done in parallel
     };
 }
 
