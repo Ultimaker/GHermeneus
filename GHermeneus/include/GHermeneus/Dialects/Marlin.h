@@ -26,7 +26,7 @@ class MarlinTranslator : public Translator<GCodeFunction<MarlinSSV, double>>
                                                       { { "temp", G0 } }){};
 };
 
-using MarlinMachine = Machine<MarlinSSV, double>;
+using MarlinMachine = Machine<MarlinTranslator, MarlinSSV, double>;
 
 } // namespace GHermeneus::Dialects::Marlin
 
