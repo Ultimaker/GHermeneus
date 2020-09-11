@@ -18,6 +18,7 @@
 #include <range/v3/range/operations.hpp>
 #include <range/v3/view/drop.hpp>
 #include <range/v3/view/enumerate.hpp>
+#include <range/v3/view/sliding.hpp>
 #include <range/v3/view/split.hpp>
 #include <range/v3/view/take.hpp>
 #include <range/v3/view/transform.hpp>
@@ -55,7 +56,7 @@ template <typename TRANS_T, typename SSV_T, typename T>
 class Machine
 {
   public:
-    Machine() : parallel_execution{ true } {};
+    Machine() : parallel_execution{ true }, translator{ TRANS_T() } {};
 
     Machine(Machine<TRANS_T, SSV_T, T>&& machine) noexcept = default;
 
@@ -95,6 +96,20 @@ class Machine
             std::transform(std::execution::seq, extractedCmds.begin(), extractedCmds.end(), cmdlines.begin(),
                            [](const auto& cmd) { return cmd.value(); });
         }
+
+        // Translate the Instructions to the vector of State Space Vectors
+        std::vector<SSV_T> ssv(cmdlines.size());
+        // TODO: Set the initial state of the machine
+        statespacevectors = ranges::views::zip(cmdlines, ssv)
+                          | ranges::views::sliding(2)
+                          | ranges::views::transform([&](auto previous, auto current) {
+                                // TODO: Not sure if this is the correct unpacking sequence
+                                auto& [state_prev, _] = previous;
+                                auto& [state_cur, instruction_cur] = current;
+                                auto translate = instruction_cur(translator);
+                                return translate(state_prev);
+                            })
+                          | ranges::to_vector;
     }
 
     /*!
@@ -209,12 +224,13 @@ class Machine
         return Instruction<SSV_T, T>(lineno, cmd, params);
     };
 
+    const TRANS_T translator; //!< The dialect translator
     std::string raw_gcode;   //!< The raw GCode (needed to store files and make sure the data of \p gcode stays in scope
     std::string_view gcode;  //!< A string_view with the full gcode
     std::vector<Line> lines; //!< A vector of Lines, a Line is a pair with the line number and the string_view
     std::vector<Instruction<SSV_T, T>> cmdlines; //!< A vector of instructions converted from the lines
     bool parallel_execution;                     //!< Indicating if parsing should be done in parallel
-    const TRANS_T translator;                    //!< The dialect translator
+    std::vector<SSV_T> statespacevectors;        //!< A vector of the state space vectors
 };
 } // namespace GHermeneus
 
