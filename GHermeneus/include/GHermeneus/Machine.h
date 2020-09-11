@@ -149,7 +149,7 @@ class Machine
      */
     void setParallelExecution(bool parallelExecution)
     {
-        Machine::parallel_execution = parallel_execution;
+        parallel_execution = parallelExecution;
     }
 
   private:
