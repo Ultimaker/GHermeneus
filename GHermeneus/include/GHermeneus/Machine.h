@@ -175,10 +175,13 @@ class Machine
     void extractLines(const std::string_view& GCode)
     {
         // TODO: keep in mind CRLF and LF
-        lines = gcode | ranges::views::split('\n') | ranges::views::transform([](auto&& line) {
+        lines = gcode
+              | ranges::views::split('\n')
+              | ranges::views::transform([](auto&& line) {
                     return std::string_view(&*line.begin(), ranges::distance(line));
                 })
-                | ranges::views::enumerate | ranges::to_vector;
+              | ranges::views::enumerate
+              | ranges::to_vector;
     };
 
     /*!
@@ -195,13 +198,17 @@ class Machine
         auto&& [lineno, gcode] = GCodeline;
 
         // Split line in instruction and comment
-        auto split_line = gcode | ranges::views::split(';');
+        auto split_line = gcode
+                        | ranges::views::split(';');
 
         // Split the instruction into individual words
-        auto split_instruction = *split_line.begin() | ranges::views::split(' ');
+        auto split_instruction = *split_line.begin()
+                               | ranges::views::split(' ');
 
         // Get the Cmd
-        auto cmd_view = split_instruction | ranges::views::take(1) | ranges::views::transform([&](auto&& c) {
+        auto cmd_view = split_instruction
+                      | ranges::views::take(1)
+                      | ranges::views::transform([&](auto&& c) {
                             return std::string_view(&*c.begin(), ranges::distance(c));
                         });
         std::string_view cmd = *cmd_view.begin();
@@ -213,14 +220,16 @@ class Machine
 
         // Get the values and parameters
         // TODO: use std::from_char instead of copying to string
-        auto params = split_instruction | ranges::views::drop(1) | ranges::views::transform([](auto&& param) {
+        auto params = split_instruction
+                    | ranges::views::drop(1)
+                    | ranges::views::transform([](auto&& param) {
                           auto identifier = param | ranges::views::take(1);
                           auto val = param | ranges::views::drop(1);
                           auto value = std::string(&*val.begin(), ranges::distance(val));
                           return Parameter<T>(std::string_view(&*identifier.begin(), ranges::distance(identifier)),
                                               std::stod(value));
                       }) // Todo: how to process the conversion of text to different T types
-                      | ranges::to_vector;
+                    | ranges::to_vector;
         return Instruction<SSV_T, T>(lineno, cmd, params);
     };
 
