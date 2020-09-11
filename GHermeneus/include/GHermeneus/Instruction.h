@@ -65,20 +65,20 @@ struct Instruction
     };
 
     /*!
-     * Returns the delta State Space Vector according to a dialect transform.
+     * Returns the delta State Space Vector according to a dialect translator.
      * The previous extracted cmd key is used to look up the corresponding function. To which the previous extracted
      * parameters and their value are passed. It will return the delta State Space Vector which can be added to the
      * n - 1  State Space Vector or subtracted from the n + 1 State Space Vector.
      *
      * Todo: Keep in mind that the delta State Space Vector might also be an absolute State Space Vector
      *
-     * @brief returns the delta State Space Vector according to a dialect transform
+     * @brief returns the delta State Space Vector according to a dialect translator
      * @param The Transform<GCodeFunction<SSV_T, T>> instance where the GCode Dialect is coupled to a GCodeFunction
      * @return The Delta State Space Vector of type SSV_T
      */
-    SSV_T operator()(const Transform<GCodeFunction<SSV_T, T>>& transform)
+    SSV_T operator()(const Translator<GCodeFunction<SSV_T, T>>& translator)
     {
-        return transform.Cmd(cmd, params);
+        return translator.Cmd(cmd, params);
     };
 };
 } // namespace GHermeneus

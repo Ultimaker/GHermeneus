@@ -18,11 +18,11 @@ static MarlinSSV G0(const MarlinSSV& prev, const MarlinParameters& param);
 
 static MarlinSSV G92(const MarlinSSV& prev, const MarlinParameters& param);
 
-class MarlinTransform : public Transform<GCodeFunction<MarlinSSV, double>>
+class MarlinTranslator : public Translator<GCodeFunction<MarlinSSV, double>>
 {
   public:
-    MarlinTransform()
-        : Transform<GCodeFunction<MarlinSSV, double>>({ { "G0", G0 }, { "G1", G0 }, { "G92", G92 } },
+    MarlinTranslator()
+        : Translator<GCodeFunction<MarlinSSV, double>>({ { "G0", G0 }, { "G1", G0 }, { "G92", G92 } },
                                                       { { "temp", G0 } }){};
 };
 

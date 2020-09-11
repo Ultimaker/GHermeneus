@@ -19,16 +19,16 @@ namespace GHermeneus
 using Line = std::pair<size_t, std::string_view>;
 
 /*!
- * @brief The Function type for where the conversion from specific GCode command takes place, which while transform
+ * @brief The Function type for where the conversion from specific GCode command takes place, which will transform
  * a previous State Space Function, given as parameter, to a new parameter. These are dialect specific.
  * @tparam SSV_T State Space Vector Type of the dialect
- * @tparam T primative type used in the State Space Vector and the parameters
+ * @tparam T primitive type used in the State Space Vector and the parameters
  */
 template <typename SSV_T, typename T>
 using GCodeFunction = std::function<SSV_T(const SSV_T&, const Parameters<T>&)>;
 
 /*!
- * @brief An Unorded map with a lookup key for a specific dialect GCode command (e.q. G0, T1, M104) and a GCodeFucntion
+ * @brief An Unorded map with a lookup key for a specific dialect GCode command (e.q. G0, T1, M104) and a GCodeFunction
  * @tparam GCFUNC_T the GCodeFunction type
  */
 template <typename GCFUNC_T>
@@ -49,7 +49,7 @@ using ParamMap = std::unordered_map<std::string_view, GCFUNC_T>; // Todo this sh
  * static MarlinSSV G0(const MarlinSSV& prev, const MarlinParameters& param);
  * static MarlinSSV G92(const MarlinSSV& prev, const MarlinParameters& param);
  *
- * class MarlinTransform : public Transform<GCodeFunction<MarlinSSV, double>>
+ * class MarlinTranslator : public Translator<GCodeFunction<MarlinSSV, double>>
  * {
  * public:
  *  MarlinTransform() :
@@ -60,15 +60,15 @@ using ParamMap = std::unordered_map<std::string_view, GCFUNC_T>; // Todo this sh
  *                   {{"temp", G0}})
  *   {};};
  *
- * @brief The dialect transform class, Each dialect has its own transform class, which maps the GCode commands to
+ * @brief The dialect translator class, Each dialect has its own translator class, which maps the GCode commands to
  * The GCodeFunctions
  * @tparam GCFUNC_T The GCodeFunction type used by the dialect.
  */
 template <typename GCFUNC_T>
-class Transform
+class Translator
 {
   public:
-    Transform<GCFUNC_T>(const CmdMap<GCFUNC_T>& cmd, const ParamMap<GCFUNC_T>& param) : cmdMap(cmd), paramMap(param){};
+    Translator<GCFUNC_T>(const CmdMap<GCFUNC_T>& cmd, const ParamMap<GCFUNC_T>& param) : cmdMap(cmd), paramMap(param){};
 
     /*!
      * @brief Returns the associated GCodeFunction for the requested cmd key
