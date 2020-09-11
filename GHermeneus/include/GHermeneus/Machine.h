@@ -51,13 +51,13 @@ namespace GHermeneus
  * @tparam SSV_T The type of the State Space Vector
  * @tparam T  The primitive type of the State Space eq. double, int etc
  */
-template <typename SSV_T, typename T>
+template <typename TRANS_T, typename SSV_T, typename T>
 class Machine
 {
   public:
     Machine() : parallel_execution{ true } {};
 
-    Machine(Machine<SSV_T, T>&& machine) noexcept = default;
+    Machine(Machine<TRANS_T, SSV_T, T>&& machine) noexcept = default;
 
     virtual ~Machine() = default;
 
@@ -100,10 +100,10 @@ class Machine
     /*!
      * @brief output the machines instruction vector to an output stream as in CSV format
      * @param os Output stream
-     * @param machine A machine of type Machine<SSV_T, T>
+     * @param machine A machine of type Machine<TRANS_T, SSV_T, T>
      * @return an output stream
      */
-    friend std::ostream& operator<<(std::ostream& os, const Machine<SSV_T, T>& machine)
+    friend std::ostream& operator<<(std::ostream& os, const Machine<TRANS_T, SSV_T, T>& machine)
     {
         for (const Instruction<SSV_T, T>& cmdline : machine.cmdlines)
         {
@@ -119,11 +119,11 @@ class Machine
 
     /*!
      * @brief Output the GCode stream to the Machines Instruction Vector
-     * @param machine The machine of type Machine<SSV_T, T>
+     * @param machine The machine of type Machine<TRANS_T, SSV_T, T>
      * @param GCode the GCode as a string_view stream
-     * @return A machine of type Machine<SSV_T, T>
+     * @return A machine of type Machine<TRANS_T, SSV_T, T>
      */
-    friend Machine<SSV_T, T>& operator<<(Machine<SSV_T, T>& machine, const std::string_view& GCode)
+    friend Machine<TRANS_T, SSV_T, T>& operator<<(Machine<TRANS_T, SSV_T, T>& machine, const std::string_view& GCode)
     {
         machine.parse(GCode);
         return machine;
@@ -131,11 +131,11 @@ class Machine
 
     /*!
      * @brief Output the GCode filestream to the Machines Instruction Vector
-     * @param machine The machine of type Machine<SSV_T, T>
+     * @param machine The machine of type Machine<TRANS_T, SSV_T, T>
      * @param file Text file stream
-     * @return A machine of type Machine<SSV_T, T>
+     * @return A machine of type Machine<TRANS_T, SSV_T, T>
      */
-    friend Machine<SSV_T, T>& operator<<(Machine<SSV_T, T>& machine, std::ifstream& file)
+    friend Machine<TRANS_T, SSV_T, T>& operator<<(Machine<TRANS_T, SSV_T, T>& machine, std::ifstream& file)
     {
         machine.raw_gcode.assign((std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>()));
         std::string_view gcode{ machine.raw_gcode };
@@ -190,8 +190,8 @@ class Machine
                             return std::string_view(&*c.begin(), ranges::distance(c));
                         });
         std::string_view cmd = *cmd_view.begin();
-        if (cmd.empty()) // No cmd nothing to do here Todo: also take into account comments that should be treated as a
-                         // cmd
+        // Todo: also take into account comments that should be treated as a cmd
+        if (cmd.empty()) // No cmd nothing to do here
         {
             return std::nullopt;
         }
@@ -214,6 +214,7 @@ class Machine
     std::vector<Line> lines; //!< A vector of Lines, a Line is a pair with the line number and the string_view
     std::vector<Instruction<SSV_T, T>> cmdlines; //!< A vector of instructions converted from the lines
     bool parallel_execution;                     //!< Indicating if parsing should be done in parallel
+    const TRANS_T translator;                    //!< The dialect translator
 };
 } // namespace GHermeneus
 
