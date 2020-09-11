@@ -18,14 +18,14 @@ namespace GHermeneus
 template <typename T = double>
 struct Parameter
 {
-    Parameter(const std::string_view& param, const T& value) : param(param), value(value){};
+    Parameter(const std::string_view& param, const T& val) : parameter(param), value(val){};
 
-    Parameter(Parameter<T>&& parameter) noexcept : param{ std::move(parameter.param) }, value{ parameter.value } {};
+    Parameter(Parameter<T>&& other) noexcept : parameter{ std::move(other.parameter) }, value{ other.value } {};
 
-    Parameter(const Parameter<T>& parameter) noexcept : param{ parameter.param }, value{ parameter.value } {};
+    Parameter(const Parameter<T>& other) noexcept : parameter{ other.parameter }, value{ other.value } {};
 
-    std::string_view param; //<! The Key of the parameter name
-    T value;                //<! The extracted GCode parameter value
+    std::string_view parameter; //<! The Key of the parameter name
+    T value;                    //<! The extracted GCode parameter value
 };
 
 template <typename T = double>

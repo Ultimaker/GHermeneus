@@ -125,7 +125,7 @@ class Machine
             os << "line: " << cmdline.line_no << " command: " << cmdline.cmd << " Parameters ->";
             for (const Parameter<T>& param : cmdline.params)
             {
-                os << " " << param.param << " = " << std::to_string(param.value);
+                os << " " << param.parameter << " = " << std::to_string(param.value);
             }
             os << std::endl;
         }
