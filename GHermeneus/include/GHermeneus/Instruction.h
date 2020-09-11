@@ -24,10 +24,10 @@ namespace GHermeneus
 template <typename SSV_T, typename T>
 struct Instruction
 {
-    Instruction() : line_no(-1), cmd(""){}; // Todo figure out why I need this constructor
+    Instruction() = default;
 
-    Instruction(const size_t& line_no, const std::string_view& cmd, Parameters<T> params)
-        : line_no(line_no), cmd(cmd), params(std::move(params)){};
+    Instruction(const size_t& line_number, const std::string_view& command, Parameters<T> parameters)
+        : line_no(line_number), cmd(command), params(std::move(parameters)){};
 
     Instruction(Instruction<SSV_T, T>&& instruction) noexcept
         : line_no(instruction.line_no), cmd(instruction.cmd), params(std::move(instruction.params)){};
