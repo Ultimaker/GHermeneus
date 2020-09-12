@@ -70,8 +70,28 @@ class Machine
     {
         m_gcode = GCode;
         extractLines(GCode); // extract the individual GCode lines
+        interpretLines(); // Extract the Commands from each line
 
-        // Extract the Commands from each line
+        // Translate the Instructions to the vector of State Space Vectors
+        m_ssvectors(m_cmdlines.size());
+        // TODO: Set the initial state of the machine
+        m_ssvectors = ranges::views::zip(m_cmdlines, m_ssvectors)
+                    | ranges::views::sliding(2)
+                    | ranges::views::transform([&](auto previous, auto current) {
+                          // TODO: Not sure if this is the correct unpacking sequence
+                          auto& [state_prev, _] = previous;
+                          auto& [state_cur, instruction_cur] = current;
+                          auto translate = instruction_cur(m_translator);
+                          return translate(state_prev);
+                      })
+                    | ranges::to_vector;
+    }
+
+    /*!
+     * @brief Interpret the Extracted GCodelines in Machine Instructions
+     */
+    void interpretLines() const
+    {
         std::vector<std::optional<Instruction<SSV_T, T>>> extractedCmds(m_lines.size());
         if (m_parallel_execution)
         {
@@ -96,20 +116,6 @@ class Machine
             std::transform(std::execution::seq, extractedCmds.begin(), extractedCmds.end(), m_cmdlines.begin(),
                            [](const auto& cmd) { return cmd.value(); });
         }
-
-        // Translate the Instructions to the vector of State Space Vectors
-        m_ssvectors(m_cmdlines.size());
-        // TODO: Set the initial state of the machine
-        m_ssvectors = ranges::views::zip(m_cmdlines, m_ssvectors)
-                    | ranges::views::sliding(2)
-                    | ranges::views::transform([&](auto previous, auto current) {
-                          // TODO: Not sure if this is the correct unpacking sequence
-                          auto& [state_prev, _] = previous;
-                          auto& [state_cur, instruction_cur] = current;
-                          auto translate = instruction_cur(m_translator);
-                          return translate(state_prev);
-                      })
-                    | ranges::to_vector;
     }
 
     /*!
