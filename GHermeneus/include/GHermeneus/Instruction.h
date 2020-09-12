@@ -24,7 +24,7 @@ namespace GHermeneus
 template <typename SSV_T, typename T>
 struct Instruction
 {
-    Instruction() = default;
+    explicit Instruction() : line_no{} {};
 
     Instruction(const size_t& line_number, const std::string_view& command, Parameters<T> parameters)
         : line_no(line_number), cmd(command), params(std::move(parameters)){};
