@@ -66,56 +66,14 @@ class Machine
      * @brief parse the GCode to the machine instruction vector
      * @param GCode a string_view containing the GCode
      */
-    void parse(const std::string_view& GCode)
+    void parse(std::string_view gcode)
     {
-        m_gcode = GCode;
-        extractLines(GCode); // extract the individual GCode lines
-        interpretLines(); // Extract the Commands from each line
-
-        // Translate the Instructions to the vector of State Space Vectors
-        m_ssvectors(m_cmdlines.size());
-        // TODO: Set the initial state of the machine
-        m_ssvectors = ranges::views::zip(m_cmdlines, m_ssvectors)
-                    | ranges::views::sliding(2)
-                    | ranges::views::transform([&](auto previous, auto current) {
-                          // TODO: Not sure if this is the correct unpacking sequence
-                          auto& [state_prev, _] = previous;
-                          auto& [state_cur, instruction_cur] = current;
-                          auto translate = instruction_cur(m_translator);
-                          return translate(state_prev);
-                      })
-                    | ranges::to_vector;
-    }
-
-    /*!
-     * @brief Interpret the Extracted GCodelines in Machine Instructions
-     */
-    void interpretLines() const
-    {
-        std::vector<std::optional<Instruction<SSV_T, T>>> extractedCmds(m_lines.size());
-        if (m_parallel_execution)
-        {
-            std::transform(std::execution::par, m_lines.begin(), m_lines.end(), extractedCmds.begin(), extractCmd);
-        }
-        else
-        {
-            std::transform(std::execution::seq, m_lines.begin(), m_lines.end(), extractedCmds.begin(), extractCmd);
-        }
-        extractedCmds.erase(std::remove_if(std::execution::seq, extractedCmds.begin(), extractedCmds.end(),
-                                           [](const auto& cmd) { return !cmd; }),
-                            extractedCmds.end());
-        m_cmdlines.resize(extractedCmds.size());
-        if (m_parallel_execution)
-        {
-            std::transform(std::execution::par, extractedCmds.begin(), extractedCmds.end(), m_cmdlines.begin(),
-                           [](const auto& cmd) { return cmd.value(); });
-            std::sort(std::execution::par, m_cmdlines.begin(), m_cmdlines.end());
-        }
-        else
-        {
-            std::transform(std::execution::seq, extractedCmds.begin(), extractedCmds.end(), m_cmdlines.begin(),
-                           [](const auto& cmd) { return cmd.value(); });
-        }
+        m_gcode = gcode;
+        auto lines = extractLines(m_gcode);                             // extract the individual GCode lines
+        auto instructions = interpretLines(lines);                      // Extract the Commands from each line
+        auto state_space_vectors = translateInstructions(instructions); // Translate the Instructions to a vector of SSV
+        // TODO: test different exec seq
+        std::move(state_space_vectors.begin(), state_space_vectors.end(), m_ss.begin());
     }
 
     /*!
@@ -126,15 +84,7 @@ class Machine
      */
     friend std::ostream& operator<<(std::ostream& os, const Machine<TRANS_T, SSV_T, T>& machine)
     {
-        for (const Instruction<SSV_T, T>& cmdline : machine.m_cmdlines)
-        {
-            os << "line: " << cmdline.line_no << " command: " << cmdline.cmd << " Parameters ->";
-            for (const Parameter<T>& param : cmdline.params)
-            {
-                os << " " << param.parameter << " = " << std::to_string(param.value);
-            }
-            os << std::endl;
-        }
+        for (const auto& ssv : machine.m_ss) {}
         return os;
     };
 
@@ -178,16 +128,48 @@ class Machine
      * @brief extract the individual lines from the GCode
      * @param GCode a string_view containing the GCode
      */
-    void extractLines(const std::string_view& GCode)
+    [[nodiscard]] std::vector<Line> extractLines(std::string_view GCode)
     {
         // TODO: keep in mind CRLF and LF
-        m_lines = m_gcode | ranges::views::split('\n')
-              | ranges::views::transform([](auto&& line) {
-                    return std::string_view(&*line.begin(), ranges::distance(line));
-                })
-              | ranges::views::enumerate
-              | ranges::to_vector;
+        return GCode | ranges::views::split('\n') | ranges::views::transform([](auto&& line) {
+                   return std::string_view(&*line.begin(), ranges::distance(line));
+               })
+             | ranges::views::enumerate | ranges::to_vector;
     };
+
+    /*!
+     * @brief Interpret the Extracted GCode lines in Machine Instructions
+     * @param lines a vector of GCode lines
+     * @return A vector of all interpreted instructions obtained from the GCode lines
+     */
+    [[nodiscard]] std::vector<Instruction<SSV_T, T>> interpretLines(const std::vector<Line>& lines) const
+    {
+        std::vector<std::optional<Instruction<SSV_T, T>>> extracted_commands(lines.size());
+        if (m_parallel_execution)
+        {
+            std::transform(std::execution::par, lines.begin(), lines.end(), extracted_commands.begin(), extractCmd);
+        }
+        else
+        {
+            std::transform(std::execution::seq, lines.begin(), lines.end(), extracted_commands.begin(), extractCmd);
+        }
+        extracted_commands.erase(std::remove_if(std::execution::seq, extracted_commands.begin(),
+                                                extracted_commands.end(), [](const auto& cmd) { return !cmd; }),
+                                 extracted_commands.end());
+        std::vector<Instruction<SSV_T, T>> commands(extracted_commands.size());
+        if (m_parallel_execution)
+        {
+            std::transform(std::execution::par, extracted_commands.begin(), extracted_commands.end(), commands.begin(),
+                           [](const auto& cmd) { return cmd.value(); });
+            std::sort(std::execution::par, commands.begin(), commands.end());
+        }
+        else
+        {
+            std::transform(std::execution::seq, extracted_commands.begin(), extracted_commands.end(), commands.begin(),
+                           [](const auto& cmd) { return cmd.value(); });
+        }
+        return commands;
+    }
 
     /*!
      * @brief Extract an instruction of type Instruction<SSV_T, T> from a GCode line. If the line contains no
@@ -203,17 +185,13 @@ class Machine
         auto&& [lineno, gcode] = GCodeline;
 
         // Split line in instruction and comment
-        auto split_line = gcode
-                        | ranges::views::split(';');
+        auto split_line = gcode | ranges::views::split(';');
 
         // Split the instruction into individual words
-        auto split_instruction = *split_line.begin()
-                               | ranges::views::split(' ');
+        auto split_instruction = *split_line.begin() | ranges::views::split(' ');
 
         // Get the Cmd
-        auto cmd_view = split_instruction
-                      | ranges::views::take(1)
-                      | ranges::views::transform([&](auto&& c) {
+        auto cmd_view = split_instruction | ranges::views::take(1) | ranges::views::transform([&](auto&& c) {
                             return std::string_view(&*c.begin(), ranges::distance(c));
                         });
         std::string_view cmd = *cmd_view.begin();
@@ -225,9 +203,7 @@ class Machine
 
         // Get the values and parameters
         // TODO: use std::from_char instead of copying to string
-        auto params = split_instruction
-                    | ranges::views::drop(1)
-                    | ranges::views::transform([](auto&& param) {
+        auto params = split_instruction | ranges::views::drop(1) | ranges::views::transform([](auto&& param) {
                           auto identifier = param | ranges::views::take(1);
                           auto val = param | ranges::views::drop(1);
                           auto value = std::string(&*val.begin(), ranges::distance(val));
@@ -238,13 +214,27 @@ class Machine
         return Instruction<SSV_T, T>(lineno, cmd, params);
     };
 
-    const TRANS_T m_translator;     //!< The dialect translator
-    bool m_parallel_execution;      //!< Indicating if parsing should be done in parallel
-    std::vector<SSV_T> m_ssvectors; //!< A vector of the state space vectors
-    std::string m_raw_gcode;        //!< The raw GCode (needed to store files and make sure the data of \p gcode stays in scope
-    std::string_view m_gcode;       //!< A string_view with the full gcode
-    std::vector<Line> m_lines;      //!< A vector of Lines, a Line is a pair with the line number and the string_view
-    std::vector<Instruction<SSV_T, T>> m_cmdlines; //!< A vector of instructions converted from the lines
+    [[nodiscard]] std::vector<SSV_T> translateInstructions(const std::vector<Instruction<SSV_T, T>>& instructions)
+    {
+        std::vector<SSV_T> ssv(instructions.size());
+        // TODO: Set the initial state of the machine
+        //        ssv = ranges::views::zip(instructions, ssv) | ranges::views::sliding(2)
+        //            | ranges::views::transform([&](auto previous, auto current) {
+        //                  // TODO: Not sure if this is the correct unpacking sequence
+        //                  auto& [state_prev, _] = previous;
+        //                  auto& [state_cur, instruction_cur] = current;
+        //                  auto translate = instruction_cur(m_translator);
+        //                  return translate(state_prev);
+        //              })
+        //            | ranges::to_vector;
+        return ssv;
+    }
+
+    const TRANS_T m_translator; //!< The dialect translator
+    bool m_parallel_execution;  //!< Indicating if parsing should be done in parallel
+    std::vector<SSV_T> m_ss;    //!< A vector of the state space vectors
+    std::string m_raw_gcode; //!< The raw GCode (needed to store files and make sure the data of \p gcode stays in scope
+    std::string_view m_gcode; //!< A string_view with the full gcode
 };
 } // namespace GHermeneus
 
