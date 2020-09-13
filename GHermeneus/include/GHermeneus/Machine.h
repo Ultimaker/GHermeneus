@@ -56,7 +56,7 @@ template <typename TRANS_T, typename SSV_T, typename T>
 class Machine
 {
   public:
-    Machine() : m_parallel_execution{ true }, m_translator{ TRANS_T() } {};
+    Machine() : m_translator{ TRANS_T() }, m_parallel_execution{ true } {};
 
     Machine(Machine<TRANS_T, SSV_T, T>&& machine) noexcept = default;
 
@@ -71,9 +71,7 @@ class Machine
         m_gcode = gcode;
         auto lines = extractLines(m_gcode);                             // extract the individual GCode lines
         auto instructions = interpretLines(lines);                      // Extract the Commands from each line
-        auto state_space_vectors = translateInstructions(instructions); // Translate the Instructions to a vector of SSV
-        // TODO: test different exec seq
-        std::move(state_space_vectors.begin(), state_space_vectors.end(), m_ss.begin());
+        m_ssv = translateInstructions(instructions); // Translate the Instructions to a vector of SSV
     }
 
     /*!
@@ -84,7 +82,7 @@ class Machine
      */
     friend std::ostream& operator<<(std::ostream& os, const Machine<TRANS_T, SSV_T, T>& machine)
     {
-        for (const auto& ssv : machine.m_ss) {}
+        for (const auto& ssv : machine.m_ssv) {}
         return os;
     };
 
@@ -132,7 +130,7 @@ class Machine
     {
         // TODO: keep in mind CRLF and LF
         return GCode | ranges::views::split('\n') | ranges::views::transform([](auto&& line) {
-                   return std::string_view(&*line.begin(), ranges::distance(line));
+                   return std::string_view(&*line.begin(), static_cast<size_t>(ranges::distance(line)));
                })
              | ranges::views::enumerate | ranges::to_vector;
     };
@@ -192,7 +190,7 @@ class Machine
 
         // Get the Cmd
         auto cmd_view = split_instruction | ranges::views::take(1) | ranges::views::transform([&](auto&& c) {
-                            return std::string_view(&*c.begin(), ranges::distance(c));
+                            return std::string_view(&*c.begin(), static_cast<size_t>(ranges::distance(c)));
                         });
         std::string_view cmd = *cmd_view.begin();
         // Todo: also take into account comments that should be treated as a cmd
@@ -206,8 +204,8 @@ class Machine
         auto params = split_instruction | ranges::views::drop(1) | ranges::views::transform([](auto&& param) {
                           auto identifier = param | ranges::views::take(1);
                           auto val = param | ranges::views::drop(1);
-                          auto value = std::string(&*val.begin(), ranges::distance(val));
-                          return Parameter<T>(std::string_view(&*identifier.begin(), ranges::distance(identifier)),
+                          auto value = std::string(&*val.begin(), static_cast<size_t >(ranges::distance(val)));
+                          return Parameter<T>(std::string_view(&*identifier.begin(), static_cast<size_t>(ranges::distance(identifier))),
                                               std::stod(value));
                       }) // Todo: how to process the conversion of text to different T types
                     | ranges::to_vector;
@@ -232,7 +230,7 @@ class Machine
 
     const TRANS_T m_translator; //!< The dialect translator
     bool m_parallel_execution;  //!< Indicating if parsing should be done in parallel
-    std::vector<SSV_T> m_ss;    //!< A vector of the state space vectors
+    std::vector<SSV_T> m_ssv;    //!< A vector of the state space vectors
     std::string m_raw_gcode; //!< The raw GCode (needed to store files and make sure the data of \p gcode stays in scope
     std::string_view m_gcode; //!< A string_view with the full gcode
 };

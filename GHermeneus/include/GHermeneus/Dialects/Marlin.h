@@ -5,9 +5,15 @@
 #ifndef GCODEHERMENEUS_MARLIN_H
 #define GCODEHERMENEUS_MARLIN_H
 
-#include "../GCode.h"
-#include "../Machine.h"
-#include "../StateSpaceVector.h"
+#include <functional>
+#include <string_view>
+#include <vector>
+
+#include <Eigen/Core>
+
+#include "GHermeneus/GCode.h"
+#include "GHermeneus/Machine.h"
+#include "GHermeneus/StateSpaceVector.h"
 
 namespace GHermeneus::Dialects::Marlin
 {

@@ -18,9 +18,9 @@ namespace GHermeneus
 template <typename T = double>
 struct Parameter
 {
-    Parameter(const std::string_view& param, const T& val) : parameter(param), value(val){};
+    Parameter() = default;
 
-    Parameter(Parameter<T>&& other) noexcept : parameter{ std::move(other.parameter) }, value{ other.value } {};
+    Parameter(const std::string_view& param, const T& val) : parameter(param), value(val){};
 
     Parameter(const Parameter<T>& other) noexcept : parameter{ other.parameter }, value{ other.value } {};
 

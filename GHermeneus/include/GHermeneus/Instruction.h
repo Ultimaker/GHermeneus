@@ -24,25 +24,14 @@ namespace GHermeneus
 template <typename SSV_T, typename T>
 struct Instruction
 {
-    explicit Instruction() : line_no{} {};
+    Instruction() = default;
 
     Instruction(const size_t& line_number, const std::string_view& command, Parameters<T> parameters)
         : line_no(line_number), cmd(command), params(std::move(parameters)){};
 
-    Instruction(Instruction<SSV_T, T>&& instruction) noexcept
-        : line_no(instruction.line_no), cmd(instruction.cmd), params(std::move(instruction.params)){};
-
-    Instruction(const Instruction<SSV_T, T>& instruction) noexcept
-        : line_no(instruction.line_no), cmd(instruction.cmd), params(instruction.params){};
-
-    const size_t line_no;       //<! The line number
-    const std::string_view cmd; //<! The command key
-    Parameters<T> params;       //<! A vector of extracted parameters
-
-    Instruction<SSV_T, T>& operator=(const Instruction<SSV_T, T>& rhs)
-    {
-        return *this;
-    }
+    size_t line_no;       //<! The line number
+    std::string_view cmd; //<! The command key
+    Parameters<T> params; //<! A vector of extracted parameters
 
     bool operator<(const Instruction<SSV_T, T>& rhs) const
     {
