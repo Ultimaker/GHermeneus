@@ -60,10 +60,6 @@ class Machine
   public:
     Machine() : m_translator{ TRANS_T() }, m_parallel_execution{ true } {};
 
-    Machine(Machine<TRANS_T, SSV_T, T>&& machine) noexcept = default;
-
-    virtual ~Machine() = default;
-
     /*!
      * @brief parse the GCode to the machine instruction vector
      * @param GCode a string_view containing the GCode
