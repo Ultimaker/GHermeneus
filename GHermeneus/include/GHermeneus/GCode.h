@@ -10,6 +10,7 @@
 #include <unordered_map>
 
 #include "GHermeneus/Parameters.h"
+#include "GHermeneus/StateSpaceVector.h"
 #include "GHermeneus/Utils/Concepts.h"
 
 namespace GHermeneus
@@ -25,79 +26,26 @@ using Line = std::pair<size_t, std::string_view>;
  * @tparam SSV_T State Space Vector Type of the dialect
  * @tparam T primitive type used in the State Space Vector and the parameters
  */
-template <typename SSV_T, typename T>
-    requires primitive<T>
-using GCodeFunction = std::function<SSV_T(const SSV_T&, const Parameters<T>&)>;
+template <typename T, int n>
+requires primitive<T> using GCodeFunction =
+    std::function<StateSpaceVector<T, n>(const StateSpaceVector<T, n>&, const Parameters<T>&)>;
 
 /*!
  * @brief An Unorded map with a lookup key for a specific dialect GCode command (e.q. G0, T1, M104) and a GCodeFunction
  * @tparam GCFUNC_T the GCodeFunction type
  */
-template <typename GCFUNC_T>
-using CmdMap = std::unordered_map<std::string_view, GCFUNC_T>;
+template <typename T, int n>
+using CmdMap = std::unordered_map<std::string_view, GCodeFunction<T, n>>;
 
 /*!
  * Todo: this current format will probably not be used
  * @brief
  */
-template <typename GCFUNC_T>
-using ParamMap = std::unordered_map<std::string_view, GCFUNC_T>; // Todo this should probably not be a GCFUNC_T
+template <typename T, int n>
+using ParamMap =
+    std::unordered_map<std::string_view, GCodeFunction<T, n>>; // Todo this should probably not be a GCFUNC_T
 
-/*!
- *
- * Each dialect has to define a class which inherits from this on, the mapping of the keys takes place in the
- * constructor:
- *
- * static MarlinSSV G0(const MarlinSSV& prev, const MarlinParameters& param);
- * static MarlinSSV G92(const MarlinSSV& prev, const MarlinParameters& param);
- *
- * class MarlinTranslator : public Translator<GCodeFunction<MarlinSSV, double>>
- * {
- * public:
- *  MarlinTransform() :
- *           Transform<GCodeFunction<MarlinSSV, double>>(
- *                   {{"G0",  G0},
- *                    {"G1",  G0},
- *                    {"G92", G92}},
- *                   {{"temp", G0}})
- *   {};};
- *
- * @brief The dialect translator class, Each dialect has its own translator class, which maps the GCode commands to
- * The GCodeFunctions
- * @tparam GCFUNC_T The GCodeFunction type used by the dialect.
- */
-template <typename GCFUNC_T>
-class Translator
-{
-  public:
-    Translator<GCFUNC_T>(const CmdMap<GCFUNC_T>& cmd, const ParamMap<GCFUNC_T>& param) : cmdMap(cmd), paramMap(param){};
 
-    /*!
-     * @brief Returns the associated GCodeFunction for the requested cmd key
-     * @param key the key as a string_view
-     * @return GCodeFunction which will be used for the transformation of the previous State Space Vector
-     */
-    GCFUNC_T Cmd(const std::string_view& key)
-    {
-        return cmdMap.at(key);
-    };
-
-    /*!
-     * Todo: this will probably change
-     * @brief
-     * @param key
-     * @return
-     */
-    GCFUNC_T Param(const std::string_view& key)
-    {
-        return paramMap.at(key);
-    };
-
-  protected:
-    const CmdMap<GCFUNC_T> cmdMap; //<! The command map containing the key and the corresponding function
-
-    const ParamMap<GCFUNC_T> paramMap;
-};
 } // namespace GHermeneus
 
 #endif // GCODEHERMENEUS_GCODE_H

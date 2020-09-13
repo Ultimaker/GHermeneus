@@ -18,20 +18,15 @@ namespace GHermeneus
  * Vector. Defaults to double
  */
 template <typename T = double>
-    requires primitive<T>
-struct Parameter
+requires primitive<T> struct Parameter
 {
-    Parameter() = default;
-
     Parameter(const std::string_view& param, const T& val) : parameter(param), value(val){};
-
-    Parameter(const Parameter<T>& other) noexcept : parameter{ other.parameter }, value{ other.value } {};
 
     std::string_view parameter; //<! The Key of the parameter name
     T value;                    //<! The extracted GCode parameter value
 };
 
 template <typename T = double>
-using Parameters = std::vector<Parameter<T>>; //<! Vector of Parameter of type T default = double
+requires primitive<T> using Parameters = std::vector<Parameter<T>>; //<! Vector of Parameter of type T default = double
 } // namespace GHermeneus
 #endif // GCODEHERMENEUS_PARAMETERS_H

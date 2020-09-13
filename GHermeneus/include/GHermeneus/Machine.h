@@ -12,6 +12,7 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 #include <range/v3/distance.hpp>
@@ -25,9 +26,9 @@
 
 #include <spdlog/spdlog.h>
 
-#include "GHermeneus/GCode.h"
 #include "GHermeneus/Instruction.h"
 #include "GHermeneus/Parameters.h"
+#include "GHermeneus/Translator.h"
 #include "GHermeneus/Utils/Concepts.h"
 
 namespace GHermeneus
@@ -55,12 +56,18 @@ namespace GHermeneus
  * @tparam SSV_T The type of the State Space Vector
  * @tparam T  The primitive type of the State Space eq. double, int etc
  */
-template <typename TRANS_T, typename SSV_T, typename T>
-    requires primitive<T>
+template <typename TRANS>
 class Machine
 {
   public:
-    Machine() : m_translator{ TRANS_T() }, m_parallel_execution{ true } {};
+    using primitive_t = typename TRANS::value_type;
+    using parameter_t = Parameter<primitive_t>;
+    using ssv_t = StateSpaceVector<primitive_t, TRANS::Size>;
+    using ssvs_t = std::vector<ssv_t>;
+    using instruction_t = Instruction<primitive_t, TRANS::Size>;
+    using instructions_t = std::vector<instruction_t>;
+
+    Machine() : m_translator{ TRANS() }, m_parallel_execution{ true } {};
 
     /*!
      * @brief parse the GCode to the machine instruction vector
@@ -70,9 +77,9 @@ class Machine
     {
         spdlog::info("*** PARSING GCODE ***");
         m_gcode = gcode;
-        auto lines = extractLines(m_gcode);                             // extract the individual GCode lines
-        auto instructions = interpretLines(lines);                      // Extract the Commands from each line
-        m_ssv = translateInstructions(instructions); // Translate the Instructions to a vector of SSV
+        auto lines = extractLines(m_gcode);           // extract the individual GCode lines
+        auto instructions = interpretLines(lines);    // Extract the Commands from each line
+        m_ssvs = translateInstructions(instructions); // Translate the Instructions to a vector of SSV
     }
 
     /*!
@@ -81,9 +88,9 @@ class Machine
      * @param machine A machine of type Machine<TRANS_T, SSV_T, T>
      * @return an output stream
      */
-    friend std::ostream& operator<<(std::ostream& os, const Machine<TRANS_T, SSV_T, T>& machine)
+    friend std::ostream& operator<<(std::ostream& os, const Machine<TRANS>& machine)
     {
-        for (const auto& ssv : machine.m_ssv) {}
+        for (const auto& ssv : machine.m_ssvs) {}
         return os;
     };
 
@@ -93,7 +100,7 @@ class Machine
      * @param GCode the GCode as a string_view stream
      * @return A machine of type Machine<TRANS_T, SSV_T, T>
      */
-    friend Machine<TRANS_T, SSV_T, T>& operator<<(Machine<TRANS_T, SSV_T, T>& machine, const std::string_view& GCode)
+    friend Machine<TRANS>& operator<<(Machine<TRANS>& machine, const std::string_view& GCode)
     {
         machine.parse(GCode);
         return machine;
@@ -105,7 +112,7 @@ class Machine
      * @param file Text file stream
      * @return A machine of type Machine<TRANS_T, SSV_T, T>
      */
-    friend Machine<TRANS_T, SSV_T, T>& operator<<(Machine<TRANS_T, SSV_T, T>& machine, std::ifstream& file)
+    friend Machine<TRANS>& operator<<(Machine<TRANS>& machine, std::ifstream& file)
     {
         machine.m_raw_gcode.assign((std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>()));
         std::string_view gcode{ machine.m_raw_gcode };
@@ -143,10 +150,10 @@ class Machine
      * @param lines a vector of GCode lines
      * @return A vector of all interpreted instructions obtained from the GCode lines
      */
-    [[nodiscard]] std::vector<Instruction<SSV_T, T>> interpretLines(const std::vector<Line>& lines) const
+    [[nodiscard]] auto interpretLines(const std::vector<Line>& lines) const
     {
         spdlog::info("*** INTERPRETING LINES ***");
-        std::vector<std::optional<Instruction<SSV_T, T>>> extracted_commands(lines.size());
+        std::vector<std::optional<instruction_t>> extracted_commands(lines.size());
         if (m_parallel_execution)
         {
             std::transform(std::execution::par, lines.begin(), lines.end(), extracted_commands.begin(), extractCmd);
@@ -158,7 +165,7 @@ class Machine
         extracted_commands.erase(std::remove_if(std::execution::seq, extracted_commands.begin(),
                                                 extracted_commands.end(), [](const auto& cmd) { return !cmd; }),
                                  extracted_commands.end());
-        std::vector<Instruction<SSV_T, T>> commands(extracted_commands.size());
+        instructions_t commands(extracted_commands.size());
         if (m_parallel_execution)
         {
             std::transform(std::execution::par, extracted_commands.begin(), extracted_commands.end(), commands.begin(),
@@ -170,7 +177,8 @@ class Machine
             std::transform(std::execution::seq, extracted_commands.begin(), extracted_commands.end(), commands.begin(),
                            [](const auto& cmd) { return cmd.value(); });
         }
-        assert(("The extracted commands should be sorted by line nr", std::is_sorted(commands.begin(), commands.end())));
+        assert(
+            ("The extracted commands should be sorted by line nr", std::is_sorted(commands.begin(), commands.end())));
         spdlog::info("Lines processed: {}", lines.size());
         spdlog::info("Instructions interpreted: {}", commands.size());
         spdlog::info("Amount of lines not interpreted: {}", lines.size() - commands.size());
@@ -183,7 +191,7 @@ class Machine
      * @param gcode_line string_view containing the line with command, the relevant parameters and/or a comment.
      * @return an optional instruction of type Instruction<SSV_T, T>
      */
-    [[nodiscard]] static std::optional<Instruction<SSV_T, T>> extractCmd(const Line& gcode_line)
+    [[nodiscard]] static std::optional<instruction_t> extractCmd(const Line& gcode_line)
     {
         auto&& [lineno, gcode] = gcode_line;
 
@@ -210,23 +218,24 @@ class Machine
         auto params = split_instruction | ranges::views::drop(1) | ranges::views::transform([](auto&& param) {
                           auto identifier = param | ranges::views::take(1);
                           auto val = param | ranges::views::drop(1);
-                          auto value = std::string(&*val.begin(), static_cast<size_t >(ranges::distance(val)));
-                          return Parameter<T>(std::string_view(&*identifier.begin(), static_cast<size_t>(ranges::distance(identifier))),
-                                              std::stod(value));
+                          auto value = std::string(&*val.begin(), static_cast<size_t>(ranges::distance(val)));
+                          return parameter_t(
+                              std::string_view(&*identifier.begin(), static_cast<size_t>(ranges::distance(identifier))),
+                              std::stod(value));
                       }) // Todo: how to process the conversion of text to different T types
                     | ranges::to_vector;
-        return Instruction<SSV_T, T>(lineno, cmd, params);
+        return instruction_t(lineno, cmd, params);
     };
 
-    [[nodiscard]] SSV_T initialState()
+    [[nodiscard]] ssv_t initialState()
     {
-        return SSV_T();
+        return ssv_t();
     }
 
-    [[nodiscard]] std::vector<SSV_T> translateInstructions(const std::vector<Instruction<SSV_T, T>>& instructions)
+    [[nodiscard]] ssvs_t translateInstructions(const instructions_t& instructions)
     {
         spdlog::info("*** TRANSLATING INSTRUCTIONS ***");
-        std::vector<SSV_T> ssv(instructions.size());
+        ssvs_t ssvs(instructions.size());
         // TODO: Set the initial state of the machine
         //        ssv = ranges::views::zip(instructions, ssv) | ranges::views::sliding(2)
         //            | ranges::views::transform([&](auto previous, auto current) {
@@ -237,12 +246,12 @@ class Machine
         //                  return translate(state_prev);
         //              })
         //            | ranges::to_vector;
-        return ssv;
+        return ssvs;
     }
 
-    const TRANS_T m_translator; //!< The dialect translator
-    bool m_parallel_execution;  //!< Indicating if parsing should be done in parallel
-    std::vector<SSV_T> m_ssv;    //!< A vector of the state space vectors
+    TRANS m_translator;        //!< The dialect translator
+    bool m_parallel_execution; //!< Indicating if parsing should be done in parallel
+    ssvs_t m_ssvs;             //!< A vector of the state space vectors
     std::string m_raw_gcode; //!< The raw GCode (needed to store files and make sure the data of \p gcode stays in scope
     std::string_view m_gcode; //!< A string_view with the full gcode
 };

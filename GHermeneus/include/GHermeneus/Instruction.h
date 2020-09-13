@@ -9,7 +9,7 @@
 #include <utility>
 #include <vector>
 
-#include "GHermeneus/GCode.h"
+#include "GHermeneus/Translator.h"
 #include "GHermeneus/Utils/Concepts.h"
 
 namespace GHermeneus
@@ -22,9 +22,8 @@ namespace GHermeneus
  * @tparam SSV_T the State Space Vector type
  * @tparam T the magnitude type
  */
-template <typename SSV_T, typename T>
-    requires primitive<T>
-struct Instruction
+template <typename T, int n>
+requires primitive<T> struct Instruction
 {
     Instruction() = default;
 
@@ -35,22 +34,22 @@ struct Instruction
     std::string_view cmd; //<! The command key
     Parameters<T> params; //<! A vector of extracted parameters
 
-    bool operator<(const Instruction<SSV_T, T>& rhs) const
+    bool operator<(const Instruction<T, n>& rhs) const
     {
         return line_no < rhs.line_no;
     };
 
-    bool operator>(const Instruction<SSV_T, T>& rhs) const
+    bool operator>(const Instruction<T, n>& rhs) const
     {
         return rhs < *this;
     };
 
-    bool operator<=(const Instruction<SSV_T, T>& rhs) const
+    bool operator<=(const Instruction<T, n>& rhs) const
     {
         return !(rhs < *this);
     };
 
-    bool operator>=(const Instruction<SSV_T, T>& rhs) const
+    bool operator>=(const Instruction<T, n>& rhs) const
     {
         return !(*this < rhs);
     };
@@ -67,7 +66,7 @@ struct Instruction
      * @param The Transform<GCodeFunction<SSV_T, T>> instance where the GCode Dialect is coupled to a GCodeFunction
      * @return The Delta State Space Vector of type SSV_T
      */
-    SSV_T operator()(const Translator<GCodeFunction<SSV_T, T>>& translator)
+    StateSpaceVector<T, n> operator()(const Translator<T, n>& translator)
     {
         return translator.Cmd(cmd, params);
     };
