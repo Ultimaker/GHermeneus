@@ -57,6 +57,7 @@ namespace GHermeneus
  * @tparam T  The primitive type of the State Space eq. double, int etc
  */
 template <typename TRANS>
+requires is_derived<Translator<typename TRANS::value_type, TRANS::Size>, TRANS>
 class Machine
 {
   public:

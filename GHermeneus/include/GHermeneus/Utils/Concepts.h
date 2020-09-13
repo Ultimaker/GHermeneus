@@ -6,20 +6,31 @@
 #define GCODEHERMENEUS_CONCEPTS_H
 
 #include <concepts>
-
-template<typename T>
-concept addable = requires (T x) { x + x; };
-
-template<typename T>
-concept subtractable = requires (T x) { x - x; };
+#include <type_traits>
+#include <utility>
 
 template <typename T>
-concept primitive = addable<T> && std::floating_point<T> && subtractable<T>;
+concept addable = requires(T x)
+{
+    x + x;
+};
 
-template<int n>
+template <typename T>
+concept subtractable = requires(T x)
+{
+    x - x;
+};
+
+template <typename T>
+concept primitive = addable<T>&& std::floating_point<T>&& subtractable<T>;
+
+template <int n>
 concept at_least_one_scalar = requires(int x)
 {
     x > 0;
 };
+
+template <typename B, typename T>
+concept is_derived = std::is_base_of<B, T>::value;
 
 #endif // GCODEHERMENEUS_CONCEPTS_H
