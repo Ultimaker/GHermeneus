@@ -5,12 +5,17 @@
 
 #include <string_view>
 #include <iostream>
+#include <fstream>
+
+#include <spdlog/spdlog.h>
 
 #include "GHermeneus/Dialects/Marlin.h"
 #include "GHermeneus/Machine.h"
 
 TEST_CASE("Parse GCode", "[machine]")
 {
+    spdlog::set_level(spdlog::level::debug);
+    using namespace GHermeneus::Dialects::Marlin;
 
     SECTION("Parse from string_view")
     {
@@ -33,11 +38,18 @@ TEST_CASE("Parse GCode", "[machine]")
         };
         const auto gcode = std::string_view{ GCode };
 
-        using namespace GHermeneus::Dialects::Marlin;
         auto UM3 = MarlinMachine();
         UM3 << gcode;
         std::cout << UM3;
 
+    }
+
+    SECTION("Parse small file", "[machine]")
+    {
+        std::ifstream gcode_file("../resources/simple.gcode");
+        auto UM3 = MarlinMachine();
+        UM3 << gcode_file;
+        std::cout << UM3;
     }
 }
 

@@ -23,6 +23,8 @@
 #include <range/v3/view/take.hpp>
 #include <range/v3/view/transform.hpp>
 
+#include <spdlog/spdlog.h>
+
 #include "GCode.h"
 #include "Instruction.h"
 #include "Parameters.h"
@@ -68,6 +70,7 @@ class Machine
      */
     void parse(std::string_view gcode)
     {
+        spdlog::info("*** PARSING GCODE ***");
         m_gcode = gcode;
         auto lines = extractLines(m_gcode);                             // extract the individual GCode lines
         auto instructions = interpretLines(lines);                      // Extract the Commands from each line
@@ -118,6 +121,7 @@ class Machine
      */
     void setParallelExecution(bool parallelExecution)
     {
+        spdlog::info("Setting parallel execution mode t {}", parallelExecution);
         m_parallel_execution = parallelExecution;
     }
 
@@ -128,6 +132,7 @@ class Machine
      */
     [[nodiscard]] std::vector<Line> extractLines(std::string_view GCode)
     {
+        spdlog::info("*** EXTRACTING LINES ***");
         // TODO: keep in mind CRLF and LF
         return GCode | ranges::views::split('\n') | ranges::views::transform([](auto&& line) {
                    return std::string_view(&*line.begin(), static_cast<size_t>(ranges::distance(line)));
@@ -142,6 +147,7 @@ class Machine
      */
     [[nodiscard]] std::vector<Instruction<SSV_T, T>> interpretLines(const std::vector<Line>& lines) const
     {
+        spdlog::info("*** INTERPRETING LINES ***");
         std::vector<std::optional<Instruction<SSV_T, T>>> extracted_commands(lines.size());
         if (m_parallel_execution)
         {
@@ -166,21 +172,21 @@ class Machine
             std::transform(std::execution::seq, extracted_commands.begin(), extracted_commands.end(), commands.begin(),
                            [](const auto& cmd) { return cmd.value(); });
         }
+        spdlog::info("Lines processed: {}", lines.size());
+        spdlog::info("Instructions interpreted: {}", commands.size());
+        spdlog::info("Amount of lines not interpreted: {}", lines.size() - commands.size());
         return commands;
     }
 
     /*!
      * @brief Extract an instruction of type Instruction<SSV_T, T> from a GCode line. If the line contains no
      *  instruction it is a std::nullopt
-     * @param GCodeline string_view containing the line with command, the relevant parameters and/or a comment.
+     * @param gcode_line string_view containing the line with command, the relevant parameters and/or a comment.
      * @return an optional instruction of type Instruction<SSV_T, T>
      */
-    [[nodiscard]] static std::optional<Instruction<SSV_T, T>> extractCmd(const Line& GCodeline)
+    [[nodiscard]] static std::optional<Instruction<SSV_T, T>> extractCmd(const Line& gcode_line)
     {
-#ifndef NDEBUG
-        std::cout << GCodeline.first << ": " << GCodeline.second << std::endl; // Todo: Use a proper logger like SPDlog
-#endif
-        auto&& [lineno, gcode] = GCodeline;
+        auto&& [lineno, gcode] = gcode_line;
 
         // Split line in instruction and comment
         auto split_line = gcode | ranges::views::split(';');
@@ -196,6 +202,7 @@ class Machine
         // Todo: also take into account comments that should be treated as a cmd
         if (cmd.empty()) // No cmd nothing to do here
         {
+            spdlog::warn("No command discerned for line {}, containing: {}", gcode_line.first, gcode_line.second);
             return std::nullopt;
         }
 
@@ -214,6 +221,7 @@ class Machine
 
     [[nodiscard]] std::vector<SSV_T> translateInstructions(const std::vector<Instruction<SSV_T, T>>& instructions)
     {
+        spdlog::info("*** TRANSLATING INSTRUCTIONS ***");
         std::vector<SSV_T> ssv(instructions.size());
         // TODO: Set the initial state of the machine
         //        ssv = ranges::views::zip(instructions, ssv) | ranges::views::sliding(2)
