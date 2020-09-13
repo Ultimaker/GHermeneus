@@ -68,7 +68,7 @@ requires primitive<T> struct Instruction
      */
     StateSpaceVector<T, n> operator()(const Translator<T, n>& translator)
     {
-        return translator.Cmd(cmd, params);
+        return translator.command(cmd, params);
     };
 };
 } // namespace GHermeneus

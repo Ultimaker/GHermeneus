@@ -39,14 +39,14 @@ class Translator
     using value_type = T;
     constexpr static int Size = n;
 
-    Translator(const CmdMap<T, n>& cmd, const ParamMap<T, n>& param) : m_command_map(cmd), m_parameter_map(param){};
+    Translator(const CmdMap<T, n>& command_map, const ParamMap<T, n>& parameter_map) : m_command_map(command_map), m_parameter_map(parameter_map){};
 
     /*!
      * @brief Returns the associated GCodeFunction for the requested cmd key
      * @param key the key as a string_view
      * @return GCodeFunction which will be used for the transformation of the previous State Space Vector
      */
-    GCodeFunction<T, n> Cmd(const std::string_view& key)
+    GCodeFunction<T, n> command(const std::string_view& key)
     {
         return m_command_map.at(key);
     };
@@ -57,7 +57,7 @@ class Translator
      * @param key
      * @return
      */
-    GCodeFunction<T, n> Param(const std::string_view& key)
+    GCodeFunction<T, n> parameter(const std::string_view& key)
     {
         return m_parameter_map.at(key);
     };
