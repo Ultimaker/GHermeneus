@@ -16,4 +16,10 @@ concept subtractable = requires (T x) { x - x; };
 template <typename T>
 concept primitive = addable<T> && std::floating_point<T> && subtractable<T>;
 
+template<int n>
+concept at_least_one_scalar = requires(int x)
+{
+    x > 0;
+};
+
 #endif // GCODEHERMENEUS_CONCEPTS_H

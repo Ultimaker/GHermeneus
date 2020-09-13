@@ -31,7 +31,7 @@ namespace GHermeneus
  * @tparam n the number of variables describing the state
  */
 template <typename T, int n> // n = t, x, y, z, x_dot, y_dot, z_dot, e, e_dot, T, T_bed
-requires primitive<T> using StateSpaceVector = Eigen::Matrix<T, n, 1>;
+requires primitive<T> && at_least_one_scalar<n> using StateSpaceVector = Eigen::Matrix<T, n, 1>;
 } // namespace GHermeneus
 
 #endif // GCODEHERMENEUS_STATESPACEVECTOR_H
