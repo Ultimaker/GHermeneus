@@ -8,6 +8,8 @@
 #include <string_view>
 #include <vector>
 
+#include "GHermeneus/Utils/Concepts.h"
+
 namespace GHermeneus
 {
 /*!
@@ -16,6 +18,7 @@ namespace GHermeneus
  * Vector. Defaults to double
  */
 template <typename T = double>
+    requires primitive<T>
 struct Parameter
 {
     Parameter() = default;

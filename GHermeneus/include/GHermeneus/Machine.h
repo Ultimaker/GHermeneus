@@ -25,9 +25,10 @@
 
 #include <spdlog/spdlog.h>
 
-#include "GCode.h"
-#include "Instruction.h"
-#include "Parameters.h"
+#include "GHermeneus/GCode.h"
+#include "GHermeneus/Instruction.h"
+#include "GHermeneus/Parameters.h"
+#include "GHermeneus/Utils/Concepts.h"
 
 namespace GHermeneus
 {
@@ -55,6 +56,7 @@ namespace GHermeneus
  * @tparam T  The primitive type of the State Space eq. double, int etc
  */
 template <typename TRANS_T, typename SSV_T, typename T>
+    requires primitive<T>
 class Machine
 {
   public:
@@ -215,6 +217,11 @@ class Machine
                     | ranges::to_vector;
         return Instruction<SSV_T, T>(lineno, cmd, params);
     };
+
+    [[nodiscard]] SSV_T initialState()
+    {
+        return SSV_T();
+    }
 
     [[nodiscard]] std::vector<SSV_T> translateInstructions(const std::vector<Instruction<SSV_T, T>>& instructions)
     {

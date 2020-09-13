@@ -17,14 +17,15 @@
 
 namespace GHermeneus::Dialects::Marlin
 {
-using MarlinParameters = Parameters<double>;
-using MarlinSSV = StateSpaceVector<double, 10>; // n = t, x, y, z, x_dot, y_dot, z_dot, e, e_dot, T
+using MarlinPrimitive = double;
+using MarlinParameters = Parameters<MarlinPrimitive>;
+using MarlinSSV = StateSpaceVector<MarlinPrimitive, 10>; // n = t, x, y, z, x_dot, y_dot, z_dot, e, e_dot, T
 
-class MarlinTranslator : public Translator<GCodeFunction<MarlinSSV, double>>
+class MarlinTranslator : public Translator<GCodeFunction<MarlinSSV, MarlinPrimitive>>
 {
   public:
     MarlinTranslator()
-        : Translator<GCodeFunction<MarlinSSV, double>>({ { "G0", G0 }, { "G1", G0 }, { "G92", G92 } },
+        : Translator<GCodeFunction<MarlinSSV, MarlinPrimitive>>({ { "G0", G0 }, { "G1", G0 }, { "G92", G92 } },
                                                       { { "temp", G0 } }){};
 
   protected:
@@ -33,7 +34,7 @@ class MarlinTranslator : public Translator<GCodeFunction<MarlinSSV, double>>
     static MarlinSSV G92(const MarlinSSV& prev, const MarlinParameters& param);
 };
 
-using MarlinMachine = Machine<MarlinTranslator, MarlinSSV, double>;
+using MarlinMachine = Machine<MarlinTranslator, MarlinSSV, MarlinPrimitive>;
 
 } // namespace GHermeneus::Dialects::Marlin
 

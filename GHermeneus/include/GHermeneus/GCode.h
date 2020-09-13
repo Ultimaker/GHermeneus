@@ -9,7 +9,8 @@
 #include <string_view>
 #include <unordered_map>
 
-#include "Parameters.h"
+#include "GHermeneus/Parameters.h"
+#include "GHermeneus/Utils/Concepts.h"
 
 namespace GHermeneus
 {
@@ -25,6 +26,7 @@ using Line = std::pair<size_t, std::string_view>;
  * @tparam T primitive type used in the State Space Vector and the parameters
  */
 template <typename SSV_T, typename T>
+    requires primitive<T>
 using GCodeFunction = std::function<SSV_T(const SSV_T&, const Parameters<T>&)>;
 
 /*!

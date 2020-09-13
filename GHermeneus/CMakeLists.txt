@@ -11,7 +11,8 @@ set(HDR_FILES
         include/GHermeneus/StateSpaceVector.h
         include/GHermeneus/GCode.h
         include/GHermeneus/Parameters.h
-        include/GHermeneus/Dialects/Marlin.h)
+        include/GHermeneus/Dialects/Marlin.h
+        include/GHermeneus/Utils/Concepts.h)
 
 add_library(
         GHermeneus

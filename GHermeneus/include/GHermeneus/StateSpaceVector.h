@@ -7,6 +7,8 @@
 
 #include <Eigen/Dense>
 
+#include "GHermeneus/Utils/Concepts.h"
+
 namespace GHermeneus
 {
 /*!
@@ -29,6 +31,7 @@ namespace GHermeneus
  * @tparam n the number of variables describing the state
  */
 template <typename T, int n = 11> // n = t, x, y, z, x_dot, y_dot, z_dot, e, e_dot, T, T_bed
+    requires primitive<T>
 using StateSpaceVector = Eigen::Matrix<T, n, 1>;
 } // namespace GHermeneus
 

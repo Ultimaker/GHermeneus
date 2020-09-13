@@ -9,7 +9,8 @@
 #include <utility>
 #include <vector>
 
-#include "GCode.h"
+#include "GHermeneus/GCode.h"
+#include "GHermeneus/Utils/Concepts.h"
 
 namespace GHermeneus
 {
@@ -22,6 +23,7 @@ namespace GHermeneus
  * @tparam T the magnitude type
  */
 template <typename SSV_T, typename T>
+    requires primitive<T>
 struct Instruction
 {
     Instruction() = default;
