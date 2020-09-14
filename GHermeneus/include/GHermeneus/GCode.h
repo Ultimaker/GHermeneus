@@ -27,7 +27,7 @@ using Line = std::pair<size_t, std::string_view>;
  * @tparam T primitive type used in the State Space Vector and the parameters
  */
 template <typename T, int n>
-requires primitive<T> using GCodeFunction =
+requires primitive<T> && at_least_one_scalar<n> using GCodeFunction =
     std::function<StateSpaceVector<T, n>(const StateSpaceVector<T, n>&, const Parameters<T>&)>;
 
 /*!
@@ -35,6 +35,7 @@ requires primitive<T> using GCodeFunction =
  * @tparam GCFUNC_T the GCodeFunction type
  */
 template <typename T, int n>
+requires primitive<T> && at_least_one_scalar<n>
 using CmdMap = std::unordered_map<std::string_view, GCodeFunction<T, n>>;
 
 /*!
@@ -42,6 +43,7 @@ using CmdMap = std::unordered_map<std::string_view, GCodeFunction<T, n>>;
  * @brief
  */
 template <typename T, int n>
+requires primitive<T> && at_least_one_scalar<n>
 using ParamMap =
     std::unordered_map<std::string_view, GCodeFunction<T, n>>; // Todo this should probably not be a GCFUNC_T
 
