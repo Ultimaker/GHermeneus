@@ -24,6 +24,32 @@ requires primitive<T> struct Parameter
 
     std::string_view parameter; //<! The Key of the parameter name
     T value;                    //<! The extracted GCode parameter value
+
+    bool operator==(const Parameter& rhs) const
+    {
+        return parameter == rhs.parameter;
+    }
+    bool operator!=(const Parameter& rhs) const
+    {
+        return !(rhs == *this);
+    }
+
+    bool operator<(const Parameter& rhs) const
+    {
+        return parameter < rhs.parameter;
+    }
+    bool operator>(const Parameter& rhs) const
+    {
+        return rhs < *this;
+    }
+    bool operator<=(const Parameter& rhs) const
+    {
+        return !(rhs < *this);
+    }
+    bool operator>=(const Parameter& rhs) const
+    {
+        return !(*this < rhs);
+    }
 };
 
 template <typename T = double>
