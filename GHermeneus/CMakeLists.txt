@@ -15,7 +15,8 @@ set(HDR_FILES
         include/GHermeneus/Translator.h
         include/GHermeneus/Dialects/Marlin.h
         include/GHermeneus/Utils/Concepts.h
-        include/GHermeneus/Utils/ConstexprMap.h)
+        include/GHermeneus/Utils/ConstexprMap.h
+        include/GHermeneus/Utils/cassert.h)
 
 add_library(
         GHermeneus

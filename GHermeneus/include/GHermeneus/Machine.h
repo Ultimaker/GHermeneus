@@ -30,6 +30,7 @@
 #include "GHermeneus/Parameters.h"
 #include "GHermeneus/Translator.h"
 #include "GHermeneus/Utils/Concepts.h"
+#include "GHermeneus/Utils/cassert.h"
 
 namespace GHermeneus
 {
@@ -179,8 +180,7 @@ class Machine
             std::transform(std::execution::seq, extracted_commands.begin(), extracted_commands.end(), commands.begin(),
                            [](const auto& cmd) { return cmd.value(); });
         }
-        assert(
-            ("The extracted commands should be sorted by line nr", std::is_sorted(commands.begin(), commands.end())));
+        assertm(std::is_sorted(commands.begin(), commands.end()), "The extracted commands should be sorted by line nr");
         spdlog::info("Lines processed: {}", lines.size());
         spdlog::info("Instructions interpreted: {}", commands.size());
         spdlog::info("Amount of lines not interpreted: {}", lines.size() - commands.size());
