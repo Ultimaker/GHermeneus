@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.17)
 project(GHermeneus)
 
 set(SRC_FILES
+        src/Translator.cpp
         src/Dialects/Marlin.cpp)
 
 set(HDR_FILES
@@ -13,7 +14,8 @@ set(HDR_FILES
         include/GHermeneus/Parameters.h
         include/GHermeneus/Translator.h
         include/GHermeneus/Dialects/Marlin.h
-        include/GHermeneus/Utils/Concepts.h)
+        include/GHermeneus/Utils/Concepts.h
+        include/GHermeneus/Utils/ConstexprMap.h)
 
 add_library(
         GHermeneus

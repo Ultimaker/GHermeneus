@@ -15,7 +15,8 @@
 TEST_CASE("Parse GCode", "[machine]")
 {
     spdlog::set_level(spdlog::level::debug);
-    using namespace GHermeneus::Dialects::Marlin;
+//    using namespace GHermeneus::Dialects::Marlin;
+    using namespace GHermeneus;
 
     SECTION("Parse from string_view")
     {
@@ -31,10 +32,8 @@ TEST_CASE("Parse GCode", "[machine]")
             "G1 F1500 E-6.5\n"             // retract filament 6.5 mm with a feedrate of 1500
             "G1 F600 Z0.27\n"              // move tool to a height of 2.27 with a feedrate of 600
             "G1 F1500 E0\n"                // move filament to 0 with a feedrate of 1500
-            "G1 F1200 X110 Y100 E0.0500\n" // move tool to 110, 100, 0.27 and extrude to 0.05 off filament with a feedrate
-            // of 1500
-            "G1 Y110.33 E0.0655\n" // move tool to 110, 110.33, 0.27 and extrude to 0.0655 off filament with a feedrate of
-            // 1500
+            "G1 F1200 X110 Y100 E0.0500\n" // move tool to 110, 100, 0.27 and extrude to 0.05 off filament with a feedrate of 1500
+            "G1 Y110.33 E0.0655\n" // move tool to 110, 110.33, 0.27 and extrude to 0.0655 off filament with a feedrate of 1500
         };
         const auto gcode = std::string_view{ GCode };
 

@@ -67,6 +67,7 @@ class Machine
     using ssvs_t = std::vector<ssv_t>;
     using instruction_t = Instruction<primitive_t, TRANS::Size>;
     using instructions_t = std::vector<instruction_t>;
+    using gcode_function_t = GCodeFunction<primitive_t, TRANS::Size>;
 
     Machine() : m_translator{ TRANS() }, m_parallel_execution{ true } {};
 
@@ -167,13 +168,13 @@ class Machine
                                                 extracted_commands.end(), [](const auto& cmd) { return !cmd; }),
                                  extracted_commands.end());
         instructions_t commands(extracted_commands.size());
-        if (m_parallel_execution)
+        if (m_parallel_execution) [[likely]]
         {
             std::transform(std::execution::par, extracted_commands.begin(), extracted_commands.end(), commands.begin(),
                            [](const auto& cmd) { return cmd.value(); });
             std::sort(std::execution::par, commands.begin(), commands.end());
         }
-        else
+        else [[unlikely]]
         {
             std::transform(std::execution::seq, extracted_commands.begin(), extracted_commands.end(), commands.begin(),
                            [](const auto& cmd) { return cmd.value(); });
@@ -230,23 +231,21 @@ class Machine
 
     [[nodiscard]] ssv_t initialState()
     {
-        return ssv_t();
+        return ssv_t::Zero();
     }
 
     [[nodiscard]] ssvs_t translateInstructions(const instructions_t& instructions)
     {
         spdlog::info("*** TRANSLATING INSTRUCTIONS ***");
         ssvs_t ssvs(instructions.size());
-        // TODO: Set the initial state of the machine
-        //        ssv = ranges::views::zip(instructions, ssv) | ranges::views::sliding(2)
-        //            | ranges::views::transform([&](auto previous, auto current) {
-        //                  // TODO: Not sure if this is the correct unpacking sequence
-        //                  auto& [state_prev, _] = previous;
-        //                  auto& [state_cur, instruction_cur] = current;
-        //                  auto translate = instruction_cur(m_translator);
-        //                  return translate(state_prev);
-        //              })
-        //            | ranges::to_vector;
+        ssvs[0] = initialState();
+        // Todo: make range
+        for (int i = 1; i < instructions.size(); ++i)
+        {
+            ssv_t ssv_prev = ssvs[i - 1];
+            auto ssv_delta = m_translator(instructions[i]);
+            ssvs[i] = ssv_prev + ssv_delta;
+        }
         return ssvs;
     }
 

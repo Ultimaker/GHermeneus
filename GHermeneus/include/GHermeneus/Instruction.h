@@ -9,8 +9,10 @@
 #include <utility>
 #include <vector>
 
-#include "GHermeneus/Translator.h"
+#include <range/v3/algorithm/sort.hpp>
+
 #include "GHermeneus/Utils/Concepts.h"
+#include "GHermeneus/Parameters.h"
 
 namespace GHermeneus
 {
@@ -23,12 +25,15 @@ namespace GHermeneus
  * @tparam T the magnitude type
  */
 template <typename T, int n>
-requires primitive<T> struct Instruction
+requires primitive<T> && at_least_one_scalar<n> struct Instruction
 {
     Instruction() = default;
 
     Instruction(const size_t& line_number, const std::string_view& command, Parameters<T> parameters)
-        : line_no(line_number), cmd(command), params(std::move(parameters)){};
+        : line_no(line_number), cmd(command), params(std::move(parameters))
+    {
+        ranges::sort(parameters);
+    };
 
     size_t line_no;       //<! The line number
     std::string_view cmd; //<! The command key
@@ -52,23 +57,6 @@ requires primitive<T> struct Instruction
     bool operator>=(const Instruction<T, n>& rhs) const
     {
         return !(*this < rhs);
-    };
-
-    /*!
-     * Returns the delta State Space Vector according to a dialect translator.
-     * The previous extracted cmd key is used to look up the corresponding function. To which the previous extracted
-     * parameters and their value are passed. It will return the delta State Space Vector which can be added to the
-     * n - 1  State Space Vector or subtracted from the n + 1 State Space Vector.
-     *
-     * Todo: Keep in mind that the delta State Space Vector might also be an absolute State Space Vector
-     *
-     * @brief returns the delta State Space Vector according to a dialect translator
-     * @param The Transform<GCodeFunction<SSV_T, T>> instance where the GCode Dialect is coupled to a GCodeFunction
-     * @return The Delta State Space Vector of type SSV_T
-     */
-    StateSpaceVector<T, n> operator()(const Translator<T, n>& translator)
-    {
-        return translator.command(cmd, params);
     };
 };
 } // namespace GHermeneus

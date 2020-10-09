@@ -2,19 +2,16 @@
 // Created by Jelle Spijker on 8/7/20.
 //
 
-#include "../../include/GHermeneus/Dialects/Marlin.h"
+#include "GHermeneus/Dialects/Marlin.h"
 
 namespace GHermeneus::Dialects::Marlin
 {
-MarlinSSV MarlinTranslator::G0(const MarlinSSV& prev, const MarlinParameters& param)
-{
-    // Todo: transform the previous state space vector into the next according to the param
-    return MarlinSSV();
-}
-
-MarlinSSV MarlinTranslator::G92(const MarlinSSV& prev, const MarlinParameters& param)
-{
-    // Todo: transform the previous state space vector into the next according to the param
-    return MarlinSSV();
-}
+//MarlinTranslator::MarlinTranslator()
+//    : Translator({ { "G0"sv, G0 }, { "G1"sv, G1 }, { "G92"sv, G92 }, { "M204"sv, M204 }, { "M205"sv, M205 } }, { { "S"sv, G0 } }) {}
+//
+//MarlinTranslator::MarlinTranslator(const CmdMap<MarlinPrimitive, MarlinStateVariables>& commandMap,
+//                                   const ParamMap<MarlinPrimitive, MarlinStateVariables>& parameterMap)
+//    : Translator(commandMap, parameterMap)
+//{
+//}
 } // namespace GHermeneus::Dialects::Marlin
