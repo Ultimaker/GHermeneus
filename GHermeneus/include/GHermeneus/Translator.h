@@ -26,7 +26,7 @@ namespace GHermeneus
  */
 template <typename T, int n>
 requires primitive<T> && at_least_one_scalar<n> using GCodeFunction =
-std::function<StateSpaceVector<T, n>(const Instruction<T, n>)>;
+std::function<StateSpaceVector<T, n>(const Parameters<T>& parameters)>;
 
 /*!
  * @brief An Unorded map with a lookup key for a specific dialect GCode command (e.q. G0, T1, M104) and a GCodeFunction
@@ -76,17 +76,6 @@ class Translator
     constexpr static int Size = n;
 
     Translator<T, n>() = default;
-
-    /*!
-     * @brief Translate the instruction into a delta StateSpaceVector
-     * @param instruction The extracted instruction from the GCode line
-     * @return The delta StateSpaceVector obtained from the instruction
-     */
-    [[nodiscard]] StateSpaceVector<T, n> operator()(const Instruction<T, n>& instruction)
-    {
-        auto cmd = m_command_map.at(instruction.cmd);
-        return cmd(instruction.params);
-    }
 
   protected:
 
@@ -332,11 +321,27 @@ class Translator
         return StateSpaceVector<T, n>::Ones();
     }
 
-  public:
-    const static CmdMap<T, n> m_command_map; //<! The command map containing the key and the corresponding function
+    CmdMap<T, n> m_command_map{
+        { "G0"sv, &Translator<T, n>::G0 },
+        { "G1"sv, &Translator<T, n>::G1 },
+        { "G92"sv, &Translator<T, n>::G92 },
+        { "M204"sv, &Translator<T, n>::M204 },
+        { "M205"sv, &Translator<T, n>::M205 }
+    };
 
-    const static ParamMap<T, n> m_parameter_map;
+  public:
+    /*!
+     * @brief Translate the instruction into a delta StateSpaceVector
+     * @param instruction The extracted instruction from the GCode line
+     * @return The delta StateSpaceVector obtained from the instruction
+     */
+    [[nodiscard]] StateSpaceVector<T, n> operator()(const Instruction<T, n>& instruction)
+    {
+        auto cmd = m_command_map.at(instruction.cmd);
+        return cmd(instruction.params);
+    }
 };
+
 } // namespace GHermeneus
 
 #endif // GCODEHERMENEUS_TRANSLATOR_H
