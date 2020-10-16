@@ -321,7 +321,7 @@ class Translator
         return StateSpaceVector<T, n>::Ones();
     }
 
-    CmdMap<T, n> m_command_map{
+    static const inline CmdMap<T, n> m_command_map{
         { "G0"sv, &Translator<T, n>::G0 },
         { "G1"sv, &Translator<T, n>::G1 },
         { "G92"sv, &Translator<T, n>::G92 },
