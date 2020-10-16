@@ -240,7 +240,7 @@ class Machine
         ssvs_t ssvs(instructions.size());
         ssvs[0] = initialState();
         // Todo: make range
-        for (int i = 1; i < instructions.size(); ++i)
+        for (size_t i = 1; i < instructions.size(); ++i)
         {
             ssv_t ssv_prev = ssvs[i - 1];
             auto ssv_delta = m_translator(instructions[i]);
