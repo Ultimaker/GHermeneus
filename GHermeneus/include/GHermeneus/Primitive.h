@@ -29,13 +29,13 @@ requires base_primitive<T> class Primitive
     constexpr Primitive<T>& operator+=(const Primitive<T>& rhs)
     {
         m_value += rhs.m_value;
-        return *m_value;
+        return *this;
     }
 
     constexpr Primitive<T>& operator-=(const Primitive<T>& rhs)
     {
         m_value -= rhs.m_value;
-        return *m_value;
+        return *this;
     }
 
     constexpr Primitive<T> operator+(const Primitive<T>& rhs) const
