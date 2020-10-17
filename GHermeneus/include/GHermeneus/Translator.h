@@ -9,6 +9,9 @@
 #include <unordered_map>
 #include <string_view>
 
+#include <range/v3/view/map.hpp>
+#include <range/v3/algorithm/contains.hpp>
+
 #include "GHermeneus/Utils/Concepts.h"
 #include "GHermeneus/Instruction.h"
 #include "GHermeneus/StateSpaceVector.h"
@@ -321,6 +324,16 @@ class Translator
         return StateSpaceVector<T, n>::Ones();
     }
 
+    /*!
+     * @brief default function used for unknown commands
+     * @param parameters The extracted parameters
+     * @return A delta StateSpaceVector of zeros
+     */
+    [[nodiscard, maybe_unused]] static StateSpaceVector<T, n> default_func(const Parameters<T>& parameters)
+    {
+        return StateSpaceVector<T, n>::Zero();
+    }
+
     static const inline CmdMap<T, n> m_command_map{
         { "G0"sv, &Translator<T, n>::G0 },
         { "G1"sv, &Translator<T, n>::G1 },
@@ -337,7 +350,8 @@ class Translator
      */
     [[nodiscard]] StateSpaceVector<T, n> operator()(const Instruction<T, n>& instruction)
     {
-        auto cmd = m_command_map.at(instruction.cmd);
+        const auto contains_cmd = ranges::contains(m_command_map | ranges::views::keys, instruction.cmd);
+        auto cmd = contains_cmd ? m_command_map.at(instruction.cmd) : default_func;
         return cmd(instruction.params);
     }
 };
