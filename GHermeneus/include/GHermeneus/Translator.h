@@ -12,6 +12,8 @@
 #include <range/v3/view/map.hpp>
 #include <range/v3/algorithm/contains.hpp>
 
+#include <spdlog/spdlog.h>
+
 #include "GHermeneus/Utils/Concepts.h"
 #include "GHermeneus/Instruction.h"
 #include "GHermeneus/StateSpaceVector.h"
@@ -331,6 +333,7 @@ class Translator
      */
     [[nodiscard, maybe_unused]] static StateSpaceVector<T, n> default_func(const Parameters<T>& parameters)
     {
+        spdlog::debug("Unknown command calling default value");
         return StateSpaceVector<T, n>::Zero();
     }
 
@@ -351,7 +354,7 @@ class Translator
     [[nodiscard]] StateSpaceVector<T, n> operator()(const Instruction<T, n>& instruction)
     {
         const auto contains_cmd = ranges::contains(m_command_map | ranges::views::keys, instruction.cmd);
-        auto cmd = contains_cmd ? m_command_map.at(instruction.cmd) : default_func;
+        const auto cmd = contains_cmd ? m_command_map.at(instruction.cmd) : default_func;
         return cmd(instruction.params);
     }
 };

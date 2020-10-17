@@ -25,6 +25,7 @@
 #include <range/v3/view/transform.hpp>
 
 #include <spdlog/spdlog.h>
+#include <fmt/ostream.h>
 
 #include "GHermeneus/Instruction.h"
 #include "GHermeneus/Parameters.h"
@@ -245,6 +246,7 @@ class Machine
             ssv_t ssv_prev = ssvs[i - 1];
             auto ssv_delta = m_translator(instructions[i]);
             ssvs[i] = ssv_prev + ssv_delta;
+            spdlog::debug("ssvs at time {}\n [{}]", i, ssvs[i]);
         }
         return ssvs;
     }
