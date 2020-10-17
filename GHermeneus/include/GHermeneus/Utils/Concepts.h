@@ -22,6 +22,9 @@ concept subtractable = requires(T x)
 };
 
 template <typename T>
+concept base_primitive = std::floating_point<T> && addable<T> && subtractable<T>;
+
+template <typename T>
 concept primitive = std::floating_point<T> && addable<T> && subtractable<T>;
 
 template <int n>
