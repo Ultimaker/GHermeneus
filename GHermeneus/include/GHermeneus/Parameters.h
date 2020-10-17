@@ -8,6 +8,8 @@
 #include <string_view>
 #include <vector>
 
+#include "GHermeneus/Utils/Concepts.h"
+
 namespace GHermeneus
 {
 /*!
@@ -16,19 +18,41 @@ namespace GHermeneus
  * Vector. Defaults to double
  */
 template <typename T = double>
-struct Parameter
+requires primitive<T> struct Parameter
 {
-    Parameter(const std::string_view& param, const T& value) : param(param), value(value){};
+    Parameter(const std::string_view& param, const T& val) : parameter(param), value(val){};
 
-    Parameter(Parameter<T>&& parameter) noexcept : param{ std::move(parameter.param) }, value{ parameter.value } {};
+    std::string_view parameter; //<! The Key of the parameter name
+    T value;                    //<! The extracted GCode parameter value
 
-    Parameter(const Parameter<T>& parameter) noexcept : param{ parameter.param }, value{ parameter.value } {};
+    bool operator==(const Parameter& rhs) const
+    {
+        return parameter == rhs.parameter;
+    }
+    bool operator!=(const Parameter& rhs) const
+    {
+        return !(rhs == *this);
+    }
 
-    std::string_view param; //<! The Key of the parameter name
-    T value;                //<! The extracted GCode parameter value
+    bool operator<(const Parameter& rhs) const
+    {
+        return parameter < rhs.parameter;
+    }
+    bool operator>(const Parameter& rhs) const
+    {
+        return rhs < *this;
+    }
+    bool operator<=(const Parameter& rhs) const
+    {
+        return !(rhs < *this);
+    }
+    bool operator>=(const Parameter& rhs) const
+    {
+        return !(*this < rhs);
+    }
 };
 
 template <typename T = double>
-using Parameters = std::vector<Parameter<T>>; //<! Vector of Parameter of type T default = double
+requires primitive<T> using Parameters = std::vector<Parameter<T>>; //<! Vector of Parameter of type T default = double
 } // namespace GHermeneus
 #endif // GCODEHERMENEUS_PARAMETERS_H

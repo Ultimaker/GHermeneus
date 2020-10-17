@@ -5,29 +5,26 @@
 #ifndef GCODEHERMENEUS_MARLIN_H
 #define GCODEHERMENEUS_MARLIN_H
 
-#include "../GCode.h"
-#include "../Machine.h"
-#include "../StateSpaceVector.h"
+#include <functional>
+#include <string_view>
+#include <vector>
 
-namespace GHermeneus::Dialects::Marlin
+#include <Eigen/Core>
+
+#include "GHermeneus/GCode.h"
+#include "GHermeneus/Machine.h"
+#include "GHermeneus/StateSpaceVector.h"
+#include "GHermeneus/Translator.h"
+
+namespace GHermeneus
 {
-using MarlinParameters = Parameters<double>;
-using MarlinSSV = StateSpaceVector<double, 10>; // n = t, x, y, z, x_dot, y_dot, z_dot, e, e_dot, T
+using MarlinPrimitive = double;
+constexpr int MarlinStateVariables = 10;
+using MarlinParameters = Parameters<MarlinPrimitive>; // n = t, x, y, z, x_dot, y_dot, z_dot, e, e_dot, T
+using MarlinSSV = StateSpaceVector<MarlinPrimitive, MarlinStateVariables>;
+using MarlinTranslator = Translator<MarlinPrimitive, MarlinStateVariables>;
+using MarlinMachine = Machine<MarlinTranslator>;
+}
 
-static MarlinSSV G0(const MarlinSSV& prev, const MarlinParameters& param);
-
-static MarlinSSV G92(const MarlinSSV& prev, const MarlinParameters& param);
-
-class MarlinTransform : public Transform<GCodeFunction<MarlinSSV, double>>
-{
-  public:
-    MarlinTransform()
-        : Transform<GCodeFunction<MarlinSSV, double>>({ { "G0", G0 }, { "G1", G0 }, { "G92", G92 } },
-                                                      { { "temp", G0 } }){};
-};
-
-using MarlinMachine = Machine<MarlinSSV, double>;
-
-} // namespace GHermeneus::Dialects::Marlin
 
 #endif // GCODEHERMENEUS_MARLIN_H

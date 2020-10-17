@@ -12,11 +12,11 @@
 static const std::string simple_file{ "../resources/simple.gcode" };
 static const std::string big_file{ "../resources/big.gcode" };
 
-size_t getNol(const std::string& filename)
+int64_t getNol(const std::string& filename)
 {
     std::ifstream gcode_file(filename);
     std::string line;
-    size_t nol{ 0 };
+    int64_t nol{ 0 };
     while (std::getline(gcode_file, line))
     {
         nol++;
