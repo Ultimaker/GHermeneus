@@ -224,7 +224,7 @@ class Machine
                           auto value = std::string(&*val.begin(), static_cast<size_t>(ranges::distance(val)));
                           return parameter_t(
                               std::string_view(&*identifier.begin(), static_cast<size_t>(ranges::distance(identifier))),
-                              std::stod(value));
+                              primitive_t(std::stod(value)));
                       }) // Todo: how to process the conversion of text to different T types
                     | ranges::to_vector;
         return instruction_t(lineno, cmd, params);

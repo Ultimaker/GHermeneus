@@ -15,10 +15,11 @@
 #include "GHermeneus/Machine.h"
 #include "GHermeneus/StateSpaceVector.h"
 #include "GHermeneus/Translator.h"
+#include "GHermeneus/Primitive.h"
 
 namespace GHermeneus
 {
-using MarlinPrimitive = double;
+using MarlinPrimitive = Primitive<double>;
 constexpr int MarlinStateVariables = 10;
 using MarlinParameters = Parameters<MarlinPrimitive>; // n = t, x, y, z, x_dot, y_dot, z_dot, e, e_dot, T
 using MarlinSSV = StateSpaceVector<MarlinPrimitive, MarlinStateVariables>;
