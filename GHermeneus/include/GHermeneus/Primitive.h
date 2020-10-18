@@ -34,11 +34,11 @@ requires base_primitive<T> class Primitive
 
     constexpr auto& operator+=(const Primitive<T>& rhs)
     {
-        if (rhs.m_relative) [[likely]]
+        if (rhs.m_relative)
         {
             m_value += rhs.m_value;
         }
-        else [[unlikely]]
+        else [[likely]]
         {
             m_value = rhs.m_value;
         }
@@ -48,11 +48,11 @@ requires base_primitive<T> class Primitive
 
     constexpr auto& operator-=(const Primitive<T>& rhs)
     {
-        if (rhs.m_relative) [[likely]]
+        if (rhs.m_relative)
         {
             m_value -= rhs.m_value;
         }
-        else [[unlikely]]
+        else [[likely]]
         {
             m_value = rhs.m_value;
         }
@@ -61,7 +61,7 @@ requires base_primitive<T> class Primitive
 
     [[nodiscard]] constexpr auto operator+(const Primitive<T>& other) const
     {
-        if (other.m_relative) [[likely]]
+        if (other.m_relative)
         {
             return Primitive<T>(m_value + other.m_value);
         }
@@ -70,7 +70,7 @@ requires base_primitive<T> class Primitive
 
     [[nodiscard]] constexpr auto operator-(const Primitive<T>& other) const
     {
-        if (other.m_relative) [[likely]]
+        if (other.m_relative)
         {
             return Primitive<T>(m_value - other.m_value);
         }
