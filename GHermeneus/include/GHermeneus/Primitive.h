@@ -23,6 +23,8 @@ requires base_primitive<T> class Primitive
 
     constexpr explicit Primitive<T>(const T value) : m_value{ value } {};
 
+    constexpr Primitive<T>(const T value, const bool relative) : m_value{ value }, m_relative { relative } {};
+
     auto operator<=>(const Primitive<T>&) const = default;
 
     constexpr operator T() const
@@ -32,8 +34,15 @@ requires base_primitive<T> class Primitive
 
     constexpr Primitive<T>& operator+=(const Primitive<T>& rhs)
     {
-        m_value += rhs.m_value;
-        return *this;
+        if (rhs.m_relative) [[likely]]
+        {
+            m_value += rhs.m_value;
+        }
+        else [[unlikely]]
+        {
+            m_value = rhs.m_value;
+        }
+        return *this;;
     }
 
     constexpr Primitive<T>& operator-=(const Primitive<T>& rhs)
@@ -42,9 +51,13 @@ requires base_primitive<T> class Primitive
         return *this;
     }
 
-    constexpr Primitive<T> operator+(const Primitive<T>& rhs) const
+    constexpr Primitive<T> operator+(const Primitive<T>& other) const
     {
-        return Primitive<T>(m_value + rhs.m_value);
+        if (rhs.m_relative) [[likely]]
+        {
+            return Primitive<T>(m_value + other.m_value);
+        }
+        return Primitive<T>(other.m_value);
     }
 
     constexpr Primitive<T> operator-(const Primitive<T>& rhs) const
@@ -52,8 +65,19 @@ requires base_primitive<T> class Primitive
         return Primitive<T>(m_value - rhs.m_value);
     }
 
+    [[nodiscard]] constexpr bool getRelative() const
+    {
+        return m_relative;
+    }
+
+    constexpr void setRelative(const bool relative)
+    {
+        m_relative = relative;
+    }
+
   private:
-    T m_value;
+    T m_value{ 0. };
+    bool m_relative{ true };
 };
 } // namespace GHermeneus
 

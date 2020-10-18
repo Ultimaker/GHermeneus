@@ -153,4 +153,16 @@ TEST_CASE("Eigen3 integration", "[primitive, eigen3]")
         auto expected_result = ssv({-2, -2});
         REQUIRE(v3 == expected_result);
     }
+
+    SECTION("Add absolute vectors")
+    {
+        ssv v1;
+        v1 << primitive_double {1. }, primitive_double  { 2. };
+        ssv v2;
+        v2 << primitive_double { 3.5 }, primitive_double { 4., false };
+        auto v3 = v1 + v2;
+        spdlog::debug("v3 =\n{}", v3);
+        auto expected_result = ssv({4.5, 4});
+        REQUIRE(v3 == expected_result);
+    }
 }
