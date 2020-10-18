@@ -32,7 +32,7 @@ requires base_primitive<T> class Primitive
         return m_value;
     }
 
-    constexpr Primitive<T>& operator+=(const Primitive<T>& rhs)
+    constexpr auto& operator+=(const Primitive<T>& rhs)
     {
         if (rhs.m_relative) [[likely]]
         {
@@ -45,13 +45,13 @@ requires base_primitive<T> class Primitive
         return *this;;
     }
 
-    constexpr Primitive<T>& operator-=(const Primitive<T>& rhs)
+    constexpr auto& operator-=(const Primitive<T>& rhs)
     {
         m_value -= rhs.m_value;
         return *this;
     }
 
-    constexpr Primitive<T> operator+(const Primitive<T>& other) const
+    constexpr auto operator+(const Primitive<T>& other) const
     {
         if (rhs.m_relative) [[likely]]
         {
@@ -60,7 +60,7 @@ requires base_primitive<T> class Primitive
         return Primitive<T>(other.m_value);
     }
 
-    constexpr Primitive<T> operator-(const Primitive<T>& rhs) const
+    constexpr auto operator-(const Primitive<T>& rhs) const
     {
         return Primitive<T>(m_value - rhs.m_value);
     }
