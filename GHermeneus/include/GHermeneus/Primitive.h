@@ -23,7 +23,7 @@ requires base_primitive<T> class Primitive
 
     constexpr explicit Primitive<T>(const T value) : m_value{ value } {};
 
-    constexpr Primitive<T>(const T value, const bool relative) : m_value{ value }, m_relative { relative } {};
+    constexpr Primitive<T>(const T value, const bool relative) : m_value{ value }, m_relative{ relative } {};
 
     auto operator<=>(const Primitive<T>&) const = default;
 
@@ -42,12 +42,20 @@ requires base_primitive<T> class Primitive
         {
             m_value = rhs.m_value;
         }
-        return *this;;
+        return *this;
+        ;
     }
 
     constexpr auto& operator-=(const Primitive<T>& rhs)
     {
-        m_value -= rhs.m_value;
+        if (rhs.m_relative) [[likely]]
+        {
+            m_value -= rhs.m_value;
+        }
+        else [[unlikely]]
+        {
+            m_value = rhs.m_value;
+        }
         return *this;
     }
 
@@ -60,9 +68,13 @@ requires base_primitive<T> class Primitive
         return Primitive<T>(other.m_value);
     }
 
-    constexpr auto operator-(const Primitive<T>& rhs) const
+    constexpr auto operator-(const Primitive<T>& other) const
     {
-        return Primitive<T>(m_value - rhs.m_value);
+        if (other.m_relative) [[likely]]
+        {
+            return Primitive<T>(m_value - other.m_value);
+        }
+        return Primitive<T>(other.m_value);
     }
 
     [[nodiscard]] constexpr bool getRelative() const
@@ -83,15 +95,15 @@ requires base_primitive<T> class Primitive
 
 namespace Eigen
 {
-template<typename T>
-requires base_primitive<T>
-struct NumTraits<GHermeneus::Primitive<T>> : NumTraits<T>
+template <typename T>
+requires base_primitive<T> struct NumTraits<GHermeneus::Primitive<T>> : NumTraits<T>
 {
     using Real = GHermeneus::Primitive<T>;
     using NonInteger = GHermeneus::Primitive<T>;
     using Nested = GHermeneus::Primitive<T>;
 
-    enum {
+    enum
+    {
         IsComplex = 0,
         IsInteger = 0,
         IsSigned = 1,
@@ -102,6 +114,6 @@ struct NumTraits<GHermeneus::Primitive<T>> : NumTraits<T>
     };
 };
 
-}
+} // namespace Eigen
 
 #endif // GCODEHERMENEUS_PRIMITIVE_H
