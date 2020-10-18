@@ -13,7 +13,7 @@
 
 namespace GHermeneus
 {
-template <typename T>
+template <typename T = double>
 requires base_primitive<T> class Primitive
 {
   public:
