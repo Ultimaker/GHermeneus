@@ -5,10 +5,15 @@
 
 #include <type_traits>
 
+#include <spdlog/spdlog.h>
+#include <fmt/ostream.h>
+
 #include "GHermeneus/Primitive.h"
+#include "GHermeneus/StateSpaceVector.h"
 
 TEST_CASE("Casting", "[primitive]")
 {
+    spdlog::set_level(spdlog::level::debug);
     using primitive_float = GHermeneus::Primitive<float>;
     using primitive_double = GHermeneus::Primitive<double>;
     using primitive_long_double = GHermeneus::Primitive<long double>;
@@ -54,6 +59,7 @@ TEST_CASE("Casting", "[primitive]")
 
 TEST_CASE("Relational", "[primitive]")
 {
+    spdlog::set_level(spdlog::level::debug);
     using primitive = GHermeneus::Primitive<double>;
 
     primitive p1 { 1 };
@@ -93,6 +99,7 @@ TEST_CASE("Relational", "[primitive]")
 
 TEST_CASE("Arithmetic", "[primitive]")
 {
+    spdlog::set_level(spdlog::level::debug);
     using primitive = GHermeneus::Primitive<double>;
     SECTION("Subtract same types")
     {
@@ -116,5 +123,34 @@ TEST_CASE("Arithmetic", "[primitive]")
 
         p_res -= p1;
         REQUIRE(p_res == 1 - 2 - 1);
+    }
+}
+
+TEST_CASE("Eigen3 integration", "[primitive, eigen3]")
+{
+    spdlog::set_level(spdlog::level::debug);
+    using primitive_double = GHermeneus::Primitive<double>;
+    using ssv = GHermeneus::StateSpaceVector<primitive_double, 2>;
+
+    SECTION("Add simple vectors")
+    {
+        ssv v1;
+        v1 << primitive_double {1. }, primitive_double  { 2. };
+        ssv v2;
+        v2 << primitive_double { 3.5 }, primitive_double { 4. };
+        auto v3 = v1 + v2;
+        auto expected_result = ssv({4.5, 6});
+        REQUIRE(v3 == expected_result);
+    }
+
+    SECTION("Subtract simple vectors")
+    {
+        ssv v1;
+        v1 << primitive_double {1. }, primitive_double  { 2. };
+        ssv v2;
+        v2 << primitive_double { 3. }, primitive_double { 4. };
+        auto v3 = v1 - v2;
+        auto expected_result = ssv({-2, -2});
+        REQUIRE(v3 == expected_result);
     }
 }

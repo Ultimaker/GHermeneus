@@ -7,6 +7,8 @@
 
 #include <compare>
 
+#include <Eigen/Core>
+
 #include "Utils/Concepts.h"
 
 namespace GHermeneus
@@ -15,6 +17,8 @@ template <typename T>
 requires base_primitive<T> class Primitive
 {
   public:
+    using value_type [[maybe_unused]] = T;
+
     constexpr Primitive<T>() = default;
 
     constexpr explicit Primitive<T>(const T value) : m_value{ value } {};
@@ -52,4 +56,28 @@ requires base_primitive<T> class Primitive
     T m_value;
 };
 } // namespace GHermeneus
+
+namespace Eigen
+{
+template<typename T>
+requires base_primitive<T>
+struct NumTraits<GHermeneus::Primitive<T>> : NumTraits<T>
+{
+    using Real = GHermeneus::Primitive<T>;
+    using NonInteger = GHermeneus::Primitive<T>;
+    using Nested = GHermeneus::Primitive<T>;
+
+    enum {
+        IsComplex = 0,
+        IsInteger = 0,
+        IsSigned = 1,
+        RequireInitialization = 0,
+        ReadCost = 1,
+        AddCost = 3,
+        MulCost = 3
+    };
+};
+
+}
+
 #endif // GCODEHERMENEUS_PRIMITIVE_H

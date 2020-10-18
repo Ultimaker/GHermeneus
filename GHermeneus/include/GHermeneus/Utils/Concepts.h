@@ -24,9 +24,6 @@ concept subtractable = requires(T x)
 template <typename T>
 concept base_primitive = std::floating_point<T> && addable<T> && subtractable<T>;
 
-template <typename T>
-concept primitive = std::floating_point<T> && addable<T> && subtractable<T>;
-
 template <int n>
 concept at_least_one_scalar = requires(int x)
 {
@@ -36,4 +33,6 @@ concept at_least_one_scalar = requires(int x)
 template <typename B, typename T>
 concept is_derived = std::is_base_of<B, T>::value;
 
+template <class T>
+concept primitive = addable<T> && subtractable<T>;
 #endif // GCODEHERMENEUS_CONCEPTS_H
