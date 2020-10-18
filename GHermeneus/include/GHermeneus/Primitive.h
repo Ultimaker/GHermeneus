@@ -53,7 +53,7 @@ requires base_primitive<T> class Primitive
 
     constexpr auto operator+(const Primitive<T>& other) const
     {
-        if (rhs.m_relative) [[likely]]
+        if (other.m_relative) [[likely]]
         {
             return Primitive<T>(m_value + other.m_value);
         }
