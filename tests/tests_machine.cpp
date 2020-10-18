@@ -3,24 +3,26 @@
 //
 #include <catch2/catch.hpp>
 
-#include <string_view>
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <string_view>
 
 #include <spdlog/spdlog.h>
 
 #include "GHermeneus/Dialects/Marlin.h"
 #include "GHermeneus/Machine.h"
 
+constexpr spdlog::level::level_enum log_level = spdlog::level::info;
+
 TEST_CASE("Parse GCode", "[machine]")
 {
-    spdlog::set_level(spdlog::level::debug);
-//    using namespace GHermeneus::Dialects::Marlin;
+    spdlog::set_level(log_level);
+    //    using namespace GHermeneus::Dialects::Marlin;
     using namespace GHermeneus;
 
     SECTION("Parse from string_view")
     {
-        const auto *const GCode{
+        const auto* const GCode{
             ";START_OF_HEADER\n"
             ";FLAVOR:Griffin\n"
             ";END_OF_HEADER\n"
@@ -40,7 +42,6 @@ TEST_CASE("Parse GCode", "[machine]")
         auto UM3 = MarlinMachine();
         UM3 << gcode;
         std::cout << UM3;
-
     }
 
     SECTION("Parse small file", "[machine]")
@@ -54,5 +55,6 @@ TEST_CASE("Parse GCode", "[machine]")
 
 TEST_CASE("Instructions test cases", "[instructions]")
 {
+    spdlog::set_level(log_level);
     REQUIRE(1 == 1);
 }

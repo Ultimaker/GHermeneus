@@ -12,8 +12,9 @@ foreach(PROGRAM ${TESTS})
     target_link_libraries(
             ${PROGRAM}
             PRIVATE
-            project_options
-            project_warnings
-            GHermeneus
-            CONAN_PKG::benchmark)
+                project_options
+                project_warnings
+                GHermeneus
+                CONAN_PKG::benchmark
+                CONAN_PKG::spdlog)
 endforeach(PROGRAM)
