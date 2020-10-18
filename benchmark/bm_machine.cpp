@@ -7,10 +7,13 @@
 #include <iostream>
 #include <string_view>
 
-#include "GHermeneus/GHermeneus.h"
+#include <spdlog/spdlog.h>
+
+#include "GHermeneus/Dialects/Marlin.h"
 
 static const std::string simple_file{ "../resources/simple.gcode" };
 static const std::string big_file{ "../resources/big.gcode" };
+constexpr spdlog::level::level_enum log_level = spdlog::level::critical;
 
 int64_t getNol(const std::string& filename)
 {
@@ -24,10 +27,11 @@ int64_t getNol(const std::string& filename)
     return nol;
 }
 
-using namespace GHermeneus::Dialects::Marlin;
+using namespace GHermeneus;
 
 static void bmSimpleFileParallel(benchmark::State& state)
 {
+    spdlog::set_level(log_level);
     for (auto _ : state)
     {
         state.PauseTiming();
@@ -43,6 +47,7 @@ BENCHMARK(bmSimpleFileParallel);
 
 static void bmSimpleFile(benchmark::State& state)
 {
+    spdlog::set_level(log_level);
     for (auto _ : state)
     {
         state.PauseTiming();
@@ -59,6 +64,7 @@ BENCHMARK(bmSimpleFile);
 
 static void bmBigFileParallel(benchmark::State& state)
 {
+    spdlog::set_level(log_level);
     for (auto _ : state)
     {
         state.PauseTiming();
@@ -74,6 +80,7 @@ BENCHMARK(bmBigFileParallel);
 
 static void bmBigFile(benchmark::State& state)
 {
+    spdlog::set_level(log_level);
     for (auto _ : state)
     {
         state.PauseTiming();
