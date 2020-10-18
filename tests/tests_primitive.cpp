@@ -103,23 +103,11 @@ TEST_CASE("Arithmetic", "[primitive]")
 {
     spdlog::set_level(log_level);
     using primitive = GHermeneus::Primitive<double>;
-    SECTION("Subtract same types")
+    SECTION("Subtract")
     {
         primitive p1{ 1 };
         primitive p2{ 2 };
         auto p_res = p1 - p2;
-
-        REQUIRE(p_res == 1 - 2);
-
-        p_res -= p1;
-        REQUIRE(p_res == 1 - 2 - 1);
-    }
-
-    SECTION("Subtract different types")
-    {
-        primitive p1{ 1 };
-        primitive p2{ 2 };
-        auto p_res = p1 - 2;
 
         REQUIRE(p_res == 1 - 2);
 

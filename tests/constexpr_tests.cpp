@@ -5,6 +5,7 @@
 #include <catch2/catch.hpp>
 
 #include "GHermeneus/Primitive.h"
+#include "GHermeneus/StateSpaceVector.h"
 using primitive_double = GHermeneus::Primitive<double>;
 
 #include <spdlog/spdlog.h>
