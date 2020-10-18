@@ -25,9 +25,9 @@ requires base_primitive<T> class Primitive
 
     constexpr Primitive<T>(const T value, const bool relative) : m_value{ value }, m_relative{ relative } {};
 
-    auto operator<=>(const Primitive<T>&) const = default;
+    [[nodiscard]] constexpr auto operator<=>(const Primitive<T>&) const = default;
 
-    constexpr operator T() const
+    [[nodiscard]] constexpr operator T() const
     {
         return m_value;
     }
@@ -59,7 +59,7 @@ requires base_primitive<T> class Primitive
         return *this;
     }
 
-    constexpr auto operator+(const Primitive<T>& other) const
+    [[nodiscard]] constexpr auto operator+(const Primitive<T>& other) const
     {
         if (other.m_relative) [[likely]]
         {
@@ -68,7 +68,7 @@ requires base_primitive<T> class Primitive
         return Primitive<T>(other.m_value);
     }
 
-    constexpr auto operator-(const Primitive<T>& other) const
+    [[nodiscard]] constexpr auto operator-(const Primitive<T>& other) const
     {
         if (other.m_relative) [[likely]]
         {
